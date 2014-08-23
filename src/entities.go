@@ -3,6 +3,7 @@ package main
 import (
 	twodee "../libs/twodee"
 	"math"
+	"math/rand"
 	"time"
 )
 
@@ -23,6 +24,7 @@ func NewSun() *PlanetaryBody {
 				0,
 			},
 		),
+		Mass: 1000.0,
 	}
 }
 
@@ -37,6 +39,8 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 				1,
 			},
 		),
+		Velocity: twodee.Pt(rand.Float32(), rand.Float32()),
+		Mass: 2000.0,
 	}
 }
 
@@ -46,8 +50,8 @@ func (p *PlanetaryBody) MoveToward(sc twodee.Point) {
 		dx = float64(sc.X - pc.X)
 		dy = float64(sc.Y - pc.Y)
 		h  = math.Hypot(dx, dy)
-		vx = float32(math.Max(1, 5-h) * 0.5 * dx / h)
-		vy = float32(math.Max(1, 5-h) * 0.5 * dy / h)
+		vx = float32(math.Max(1, 5-h) * 0.3 * dx / h)
+		vy = float32(math.Max(1, 5-h) * 0.3 * dy / h)
 	)
 	p.Velocity.X += (vx - p.Velocity.X)
 	p.Velocity.Y += (vy - p.Velocity.Y)
@@ -63,7 +67,7 @@ func (p *PlanetaryBody) GravitateToward(sc twodee.Point) {
 	// Normalize vector and include sensible constraints.
 	avx = avx / d
 	avy = avy / d
-	av := twodee.Pt(float32(math.Max(1, 5-d)*0.2*avx), float32(math.Max(1, 5-d)*0.2*avy))
+	av := twodee.Pt(float32(math.Max(1, 5-d)*0.3*avx), float32(math.Max(1, 5-d)*0.3*avy))
 
 	// There are two possible orthogonal 'circulation' vectors.
 	cv1 := twodee.Pt(-av.Y, av.X)
@@ -85,8 +89,8 @@ func (p *PlanetaryBody) GravitateToward(sc twodee.Point) {
 
 	// Now do some vector addition.
 	fv := twodee.Pt(av.X+cv.X, av.Y+cv.Y)
-	p.Velocity.X += (fv.X - p.Velocity.X)
-	p.Velocity.Y += (fv.Y - p.Velocity.Y)
+	p.Velocity.X += (fv.X - p.Velocity.X) / 30
+	p.Velocity.Y += (fv.Y - p.Velocity.Y) / 30
 }
 
 func (p *PlanetaryBody) Update(elapsed time.Duration) {

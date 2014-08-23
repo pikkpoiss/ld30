@@ -17,8 +17,15 @@ func NewSimulation() *Simulation {
 }
 
 func (s *Simulation) Update(elapsed time.Duration) {
+	var centroid = s.Sun.Pos().Scale(s.Sun.Mass)
+	var weight = s.Sun.Mass
 	for _, p := range s.Planets {
-		p.GravitateToward(s.Sun.Pos())
+		centroid = centroid.Add(p.Pos().Scale(p.Mass))
+		weight += p.Mass
+	}
+	centroid = centroid.Scale(1.0 / weight)
+	for _, p := range s.Planets {
+		p.GravitateToward(centroid)
 		p.Update(elapsed)
 	}
 }
