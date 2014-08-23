@@ -46,8 +46,8 @@ build/$(PROJECT)-osx-$(VERSION).zip: \
 	$(OSXBUILD)/Info.plist \
 	$(OSXLIBSD) \
 	$(OSXBUILD)/MacOS/$(PROJECT) \
-	$(substr src/assets/,$(OSXBUILD)/Resources/assets/,$(RUNTIME_ASSETS)) \
-	$(substr assets/,$(OSXBUILD)/Resources/,$(ICON_ASSETS))
+	$(subst src/assets/,$(OSXBUILD)/Resources/assets/,$(RUNTIME_ASSETS)) \
+	$(subst assets/,$(OSXBUILD)/Resources/,$(ICON_ASSETS))
 	cd build && zip -r $(notdir $@) $(PROJECT)-osx
 
 $(WINBUILD)/$(PROJECT).exe: $(SOURCES)
@@ -65,7 +65,7 @@ $(WINBUILD)/assets/%: src/assets/%
 build/$(PROJECT)-win-$(VERSION).zip: \
 	$(WINBUILD)/$(PROJECT).exe \
 	$(WINLIBSD) \
-	$(substr src/assets/,$(WINBUILD)/Resources/assets/,$(RUNTIME_ASSETS)) \
+	$(subst src/assets/,$(WINBUILD)/Resources/assets/,$(RUNTIME_ASSETS)) \
 	cd build && /c/Program\ Files/7-Zip/7z.exe a -r $(notdir $@) $(PROJECT)-win
 
 build: build/$(PROJECT)-osx-$(VERSION).zip
