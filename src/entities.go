@@ -7,41 +7,59 @@ import (
 	"time"
 )
 
+type PlanetaryState int32
+
+const (
+	_                  = iota
+	Sun PlanetaryState = 1 << iota
+	Fertile
+	TooClose
+	TooFar
+)
+
+var PlanetaryAnimations = map[PlanetaryState][]int{
+	Sun:      []int{0},
+	Fertile:  []int{4},
+	TooClose: []int{8},
+	TooFar:   []int{12},
+}
+
 type PlanetaryBody struct {
 	*twodee.AnimatingEntity
 	Velocity twodee.Point
 	Mass     float32
+	State    PlanetaryState
 }
 
 func NewSun() *PlanetaryBody {
-	return &PlanetaryBody{
+	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			0, 0,
 			32.0/PxPerUnit, 32.0/PxPerUnit,
 			0,
 			twodee.Step10Hz,
-			[]int{
-				0,
-			},
+			[]int{0},
 		),
 		Mass: 1000.0,
 	}
+	body.SetState(Sun)
+	return body
 }
 
 func NewPlanet(x, y float32) *PlanetaryBody {
-	return &PlanetaryBody{
+	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			x, y,
 			32.0/PxPerUnit, 32.0/PxPerUnit,
 			0,
 			twodee.Step10Hz,
-			[]int{
-				1,
-			},
+			[]int{0},
 		),
 		Velocity: twodee.Pt(rand.Float32(), rand.Float32()),
-		Mass: 2000.0,
+		Mass:     2000.0,
 	}
+	body.SetState(Fertile)
+	return body
 }
 
 func (p *PlanetaryBody) MoveToward(sc twodee.Point) {
@@ -97,4 +115,25 @@ func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	p.AnimatingEntity.Update(elapsed)
 	pos := p.Pos()
 	p.MoveTo(twodee.Pt(pos.X+p.Velocity.X, pos.Y+p.Velocity.Y))
+}
+
+func (p *PlanetaryBody) RemState(state PlanetaryState) {
+	p.SetState(p.State & ^state)
+}
+
+func (p *PlanetaryBody) AddState(state PlanetaryState) {
+	p.SetState(p.State | state)
+}
+
+func (p *PlanetaryBody) SwapState(rem, add PlanetaryState) {
+	p.SetState(p.State & ^rem | add)
+}
+
+func (p *PlanetaryBody) SetState(state PlanetaryState) {
+	if state != p.State {
+		p.State = state
+		if frames, ok := PlanetaryAnimations[p.State]; ok {
+			p.SetFrames(frames)
+		}
+	}
 }
