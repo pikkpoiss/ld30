@@ -34,7 +34,7 @@ func NewApplication() (app *Application, err error) {
 		return
 	}
 	context.SetFullscreen(false)
-	context.SetCursor(false)
+	context.SetCursor(true)
 	if err = context.CreateWindow(int(winbounds.Max.X), int(winbounds.Max.Y), "LD30"); err != nil {
 		return
 	}
