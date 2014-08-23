@@ -18,7 +18,7 @@ func NewSimulation() *Simulation {
 
 func (s *Simulation) Update(elapsed time.Duration) {
 	for _, p := range s.Planets {
-		p.MoveToward(s.Sun.Pos())
+		p.GravitateToward(s.Sun.Pos())
 		p.Update(elapsed)
 	}
 }
