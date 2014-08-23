@@ -2,6 +2,7 @@ package main
 
 import (
 	twodee "../libs/twodee"
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -26,9 +27,12 @@ var PlanetaryAnimations = map[PlanetaryState][]int{
 
 type PlanetaryBody struct {
 	*twodee.AnimatingEntity
-	Velocity twodee.Point
-	Mass     float32
-	State    PlanetaryState
+	Velocity             twodee.Point
+	Mass                 float32
+	Population           float32
+	MaxPopulation        float32
+	PopulationGrowthRate float32
+	State                PlanetaryState
 }
 
 func NewSun() *PlanetaryBody {
@@ -40,13 +44,20 @@ func NewSun() *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Mass: 1000.0,
+		Mass:                 1000.0,
+		Population:           0.0,
+		MaxPopulation:        0.0,
+		PopulationGrowthRate: 0.0,
 	}
 	body.SetState(Sun)
 	return body
 }
 
 func NewPlanet(x, y float32) *PlanetaryBody {
+	var (
+		Mass float32
+	)
+
 	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			x, y,
@@ -55,10 +66,16 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Velocity: twodee.Pt(rand.Float32(), rand.Float32()),
-		Mass:     2000.0,
+		Velocity:             twodee.Pt(rand.Float32(), rand.Float32()),
+		Mass:                 2000.0,
+		Population:           100.0,
+		MaxPopulation:        Mass * 1000.0,
+		PopulationGrowthRate: 1.0,
 	}
 	body.SetState(Fertile)
+	fmt.Printf("Growth Rate: %f\n", body.PopulationGrowthRate)
+	fmt.Printf("Max Population: %f\n", body.MaxPopulation)
+	fmt.Printf("Population: %f\n", body.Population)
 	return body
 }
 
@@ -111,8 +128,13 @@ func (p *PlanetaryBody) GravitateToward(sc twodee.Point) {
 	p.Velocity.Y += (fv.Y - p.Velocity.Y) / 30
 }
 
+func (p *PlanetaryBody) UpdatePopulation(elapsed time.Duration) {
+	p.Population = p.MaxPopulation / (1 + ((p.MaxPopulation/p.Population)-1)*float32(math.Exp(-1*float64(p.PopulationGrowthRate)*float64(elapsed))))
+}
+
 func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	p.AnimatingEntity.Update(elapsed)
+	p.UpdatePopulation(elapsed)
 	pos := p.Pos()
 	p.MoveTo(twodee.Pt(pos.X+p.Velocity.X, pos.Y+p.Velocity.Y))
 }
