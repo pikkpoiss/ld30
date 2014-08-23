@@ -61,5 +61,16 @@ func (l *GameLayer) Reset() (err error) {
 }
 
 func (l *GameLayer) HandleEvent(evt twodee.Event) bool {
+	switch event := evt.(type) {
+	case *twodee.KeyEvent:
+		if event.Type != twodee.Press {
+			break
+		}
+		switch event.Code {
+		case twodee.KeyEscape:
+			l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(GameIsClosing))
+			return false
+		}
+	}
 	return true
 }

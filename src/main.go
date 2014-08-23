@@ -12,7 +12,6 @@ func init() {
 	runtime.LockOSThread()
 }
 
-
 type Application struct {
 	layers                *twodee.Layers
 	Context               *twodee.Context
