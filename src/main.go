@@ -125,11 +125,13 @@ func main() {
 			updated_to = updated_to.Add(step)
 		}
 		if diff := current_time.Sub(last_render); diff < render_max {
-			time.Sleep(render_max - diff)
+			//time.Sleep(render_max - diff)
+			time.Sleep(1)
+		} else {
+			app.Draw()
+			app.Context.Window.SwapBuffers()
+			last_render = current_time
 		}
-		app.Draw()
-		app.Context.Window.SwapBuffers()
-		last_render = current_time
 		app.Context.Events.Poll()
 		app.GameEventHandler.Poll()
 		app.ProcessEvents()
