@@ -16,7 +16,7 @@ You are trying to populate a solar system with life.  You can place Earth-like p
   * [ ] Have planet orbit sun
   * [ ] Multiple planets
   * [ ] Placeholder art
-  * [ ] Music loading
+  * [x] Music loading
   * [ ] Heads up display of temp, population for planets
     
 ## Setup
