@@ -29,6 +29,10 @@ $(OSXBUILD)/Info.plist: pkg/osx/Info.plist
 	mkdir -p $(OSXBUILD)
 	sed $(REPLACE) $< > $@
 
+$(OSXBUILD)/MacOS/%.dylib: libs/osx/%.dylib
+	mkdir -p $(dir $@)
+	cp $< $@
+
 $(OSXBUILD)/MacOS/$(PROJECT): $(SOURCES)
 	mkdir -p $(dir $@)
 	go build -o $@ src/*.go
