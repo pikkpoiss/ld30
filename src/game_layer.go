@@ -37,7 +37,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	if layer.TileRenderer, err = twodee.NewTileRenderer(layer.Bounds, app.WinBounds, tilem); err != nil {
 		return
 	}
-	if layer.GlowRenderer, err = NewGlowRenderer(128, 128); err != nil {
+	if layer.GlowRenderer, err = NewGlowRenderer(64, 64); err != nil {
 		return
 	}
 	layer.DropPlanetListener = layer.App.GameEventHandler.AddObserver(DropPlanet, layer.OnDropPlanet)
