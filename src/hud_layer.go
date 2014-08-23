@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"time"
 
@@ -50,17 +51,18 @@ func (l *HudLayer) Delete() {
 
 func (l *HudLayer) Render() {
 	var (
-		textCache *twodee.TextCache
-		texture   *twodee.Texture
-		ok        bool
-		y         = l.bounds.Max.Y
+		textCache           *twodee.TextCache
+		texture             *twodee.Texture
+		ok                  bool
+		y                   = l.bounds.Max.Y
+		aggregatePopulation = l.game.Sim.GetPopulation()
 	)
 	l.text.Bind()
 	if textCache, ok = l.cache[1]; !ok {
 		textCache = twodee.NewTextCache(l.regularFont)
 		l.cache[1] = textCache
 	}
-	textCache.SetText("Population: 0")
+	textCache.SetText(fmt.Sprintf("POPULATION: %d", aggregatePopulation))
 	texture = textCache.Texture
 	if texture != nil {
 		y = y - float32(texture.Height)

@@ -7,6 +7,7 @@ import (
 const (
 	GameIsClosing twodee.GameEventType = iota
 	PlayBackgroundMusic
+	PlayPlanetDropEffect
 	DropPlanet
 	sentinel
 )
