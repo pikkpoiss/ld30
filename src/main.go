@@ -56,6 +56,7 @@ func NewApplication() (app *Application, err error) {
 
 	layers.Push(gameLayer)
 	app.gameClosingObserverId = app.GameEventHandler.AddObserver(GameIsClosing, app.CloseGame)
+	app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayBackgroundMusic))
 	return
 }
 
@@ -105,8 +106,6 @@ func main() {
 		panic(err)
 	}
 	defer app.Delete()
-
-	app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayBackgroundMusic))
 
 	var (
 		last_render  = time.Now()
