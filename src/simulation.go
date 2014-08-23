@@ -27,6 +27,15 @@ func (s *Simulation) Update(elapsed time.Duration) {
 	for _, p := range s.Planets {
 		p.GravitateToward(centroid)
 		p.Update(elapsed)
+		dist := p.Pos().DistanceTo(s.Sun.Pos())
+		switch {
+		case dist < 10:
+			p.SetState(TooClose)
+		case dist > 15:
+			p.SetState(TooFar)
+		default:
+			p.SetState(Fertile)
+		}
 	}
 }
 
