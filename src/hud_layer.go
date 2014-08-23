@@ -60,7 +60,7 @@ func (l *HudLayer) Render() {
 		textCache = twodee.NewTextCache(l.regularFont)
 		l.cache[1] = textCache
 	}
-	textCache.SetText("Population: 0")
+	textCache.SetText("POPULATION: 0")
 	texture = textCache.Texture
 	if texture != nil {
 		y = y - float32(texture.Height)
