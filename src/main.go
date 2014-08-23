@@ -27,6 +27,7 @@ func NewApplication() (app *Application, err error) {
 		layers            *twodee.Layers
 		context           *twodee.Context
 		gameLayer         *GameLayer
+		hudLayer          *HudLayer
 		winbounds         = twodee.Rect(0, 0, 1024, 768)
 		gameEventHandler  = twodee.NewGameEventHandler(NumGameEventTypes)
 		initiateCloseGame = false
@@ -50,11 +51,15 @@ func NewApplication() (app *Application, err error) {
 	if gameLayer, err = NewGameLayer(app); err != nil {
 		return
 	}
+	if hudLayer, err = NewHudLayer(app, gameLayer); err != nil {
+		return
+	}
 	if app.AudioSystem, err = NewAudioSystem(app); err != nil {
 		return
 	}
 
 	layers.Push(gameLayer)
+	layers.Push(hudLayer)
 	app.gameClosingObserverId = app.GameEventHandler.AddObserver(GameIsClosing, app.CloseGame)
 	app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayBackgroundMusic))
 	return
