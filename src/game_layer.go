@@ -2,7 +2,6 @@ package main
 
 import (
 	twodee "../libs/twodee"
-	"fmt"
 	"time"
 )
 
