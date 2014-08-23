@@ -10,12 +10,14 @@ type GameLayer struct {
 	TileRenderer  *twodee.TileRenderer
 	Bounds        twodee.Rectangle
 	App           *Application
+	Sun           *twodee.AnimatingEntity
 }
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	layer = &GameLayer{
 		App:    app,
-		Bounds: twodee.Rect(0, 0, 20, 20),
+		Bounds: twodee.Rect(-28, -21, 28, 21),
+		Sun:    NewSun(),
 	}
 	if layer.BatchRenderer, err = twodee.NewBatchRenderer(layer.Bounds, app.WinBounds); err != nil {
 		return
@@ -23,8 +25,8 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	tilem := twodee.TileMetadata{
 		Path:       "assets/tiles.fw.png",
 		PxPerUnit:  int(PxPerUnit),
-		TileWidth:  32,
-		TileHeight: 32,
+		TileWidth:  128,
+		TileHeight: 128,
 	}
 	if layer.TileRenderer, err = twodee.NewTileRenderer(layer.Bounds, app.WinBounds, tilem); err != nil {
 		return
@@ -45,6 +47,8 @@ func (l *GameLayer) Render() {
 	l.BatchRenderer.Bind()
 	l.BatchRenderer.Bind()
 	l.TileRenderer.Bind()
+	frame := l.Sun.Frame()
+	l.TileRenderer.Draw(frame, 0, 0, 0, false, false)
 	l.TileRenderer.Unbind()
 	return
 }
