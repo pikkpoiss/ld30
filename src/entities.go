@@ -2,7 +2,6 @@ package main
 
 import (
 	twodee "../libs/twodee"
-	//"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -66,7 +65,7 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
-		PopulationGrowthRate: 1.0,
+		PopulationGrowthRate: 0.01,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -123,21 +122,11 @@ func (p *PlanetaryBody) GravitateToward(sc twodee.Point) {
 }
 
 func (p *PlanetaryBody) UpdatePopulation(elapsed time.Duration) {
-	/*var (
-		growing = 1.0
-	)
-
-	if (p.State == 1) || (p.State == 2) {
-		growing = 1.0
+	if p.State == Fertile {
+		p.Population = p.MaxPopulation / (1 + ((p.MaxPopulation/p.Population)-1)*float32(math.Exp(-1*float64(p.PopulationGrowthRate)*float64(elapsed/time.Millisecond))))
 	} else {
-		growing = -1.0
-	}*/
-
-	p.Population = p.MaxPopulation / (1 + ((p.MaxPopulation/p.Population)-1)*float32(math.Exp(-1*float64(p.PopulationGrowthRate)*float64(elapsed))))
-	//fmt.Printf("Growth Rate: %f\n", p.PopulationGrowthRate)
-	//fmt.Printf("Max Population: %f\n", p.MaxPopulation)
-	//fmt.Printf("Population: %f\n", p.Population)
-	//fmt.Printf("growing: %f\n", growing)
+		p.Population = p.MaxPopulation / (1 + ((p.MaxPopulation/p.Population)-1)*float32(math.Exp(float64(p.PopulationGrowthRate)*float64(elapsed/time.Millisecond))))
+	}
 }
 
 func (p *PlanetaryBody) Update(elapsed time.Duration) {
