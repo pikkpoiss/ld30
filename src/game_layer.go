@@ -10,8 +10,7 @@ type GameLayer struct {
 	TileRenderer       *twodee.TileRenderer
 	Bounds             twodee.Rectangle
 	App                *Application
-	Sun                *twodee.AnimatingEntity
-	Planets            []*twodee.AnimatingEntity
+	Sim                *Simulation
 	MouseX             float32
 	MouseY             float32
 	DropPlanetListener int
@@ -19,10 +18,9 @@ type GameLayer struct {
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	layer = &GameLayer{
-		App:     app,
-		Bounds:  twodee.Rect(-28, -21, 28, 21),
-		Sun:     NewSun(),
-		Planets: []*twodee.AnimatingEntity{},
+		App:    app,
+		Bounds: twodee.Rect(-28, -21, 28, 21),
+		Sim:    NewSimulation(),
 	}
 	if layer.BatchRenderer, err = twodee.NewBatchRenderer(layer.Bounds, app.WinBounds); err != nil {
 		return
@@ -54,9 +52,9 @@ func (l *GameLayer) Render() {
 	l.BatchRenderer.Bind()
 	l.BatchRenderer.Bind()
 	l.TileRenderer.Bind()
-	pos := l.Sun.Pos()
-	l.TileRenderer.Draw(l.Sun.Frame(), pos.X, pos.Y, 0, false, false)
-	for _, p := range l.Planets {
+	pos := l.Sim.Sun.Pos()
+	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, 0, false, false)
+	for _, p := range l.Sim.Planets {
 		pos = p.Pos()
 		l.TileRenderer.Draw(p.Frame(), pos.X, pos.Y, 0, false, false)
 	}
@@ -65,6 +63,7 @@ func (l *GameLayer) Render() {
 }
 
 func (l *GameLayer) Update(elapsed time.Duration) {
+	l.Sim.Update(elapsed)
 }
 
 func (l *GameLayer) Reset() (err error) {
@@ -96,6 +95,6 @@ func (l *GameLayer) HandleEvent(evt twodee.Event) bool {
 func (l *GameLayer) OnDropPlanet(evt twodee.GETyper) {
 	switch event := evt.(type) {
 	case *DropPlanetEvent:
-		l.Planets = append(l.Planets, NewPlanet(event.X, event.Y))
+		l.Sim.AddPlanet(event.X, event.Y)
 	}
 }
