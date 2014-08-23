@@ -15,6 +15,7 @@ func init() {
 type Application struct {
 	layers                *twodee.Layers
 	Context               *twodee.Context
+	AudioSystem           *AudioSystem
 	WinBounds             twodee.Rectangle
 	GameEventHandler      *twodee.GameEventHandler
 	gameClosingObserverId int
@@ -49,6 +50,10 @@ func NewApplication() (app *Application, err error) {
 	if gameLayer, err = NewGameLayer(app); err != nil {
 		return
 	}
+	if app.AudioSystem, err = NewAudioSystem(app); err != nil {
+		return
+	}
+
 	layers.Push(gameLayer)
 	app.gameClosingObserverId = app.GameEventHandler.AddObserver(GameIsClosing, app.CloseGame)
 	return
@@ -66,6 +71,7 @@ func (a *Application) Update(elapsed time.Duration) {
 func (a *Application) Delete() {
 	a.GameEventHandler.RemoveObserver(GameIsClosing, a.gameClosingObserverId)
 	a.layers.Delete()
+	a.AudioSystem.Delete()
 	a.Context.Delete()
 }
 
@@ -99,6 +105,8 @@ func main() {
 		panic(err)
 	}
 	defer app.Delete()
+
+	app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayBackgroundMusic))
 
 	var (
 		last_render  = time.Now()

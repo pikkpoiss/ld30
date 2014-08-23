@@ -6,6 +6,7 @@ import (
 
 const (
 	GameIsClosing twodee.GameEventType = iota
+	PlayBackgroundMusic
 	sentinel
 )
 
