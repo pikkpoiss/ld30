@@ -1,3 +1,3 @@
 package main
 
-const PxPerUnit float32 = 16.0
+const PxPerUnit float32 = 8.0
