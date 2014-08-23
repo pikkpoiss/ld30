@@ -65,7 +65,7 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
-		PopulationGrowthRate: 0.01,
+		PopulationGrowthRate: 0.0001,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -155,4 +155,8 @@ func (p *PlanetaryBody) SetState(state PlanetaryState) {
 			p.SetFrames(frames)
 		}
 	}
+}
+
+func (p *PlanetaryBody) GetPopulation() int {
+	return int(p.Population)
 }
