@@ -25,7 +25,8 @@ func NewApplication() (app *Application, err error) {
 	var (
 		layers            *twodee.Layers
 		context           *twodee.Context
-		winbounds         = twodee.Rect(0, 0, 640, 640)
+		gameLayer         *GameLayer
+		winbounds         = twodee.Rect(0, 0, 1024, 768)
 		gameEventHandler  = twodee.NewGameEventHandler(NumGameEventTypes)
 		initiateCloseGame = false
 	)
@@ -45,6 +46,10 @@ func NewApplication() (app *Application, err error) {
 		GameEventHandler:  gameEventHandler,
 		InitiateCloseGame: initiateCloseGame,
 	}
+	if gameLayer, err = NewGameLayer(app); err != nil {
+		return
+	}
+	layers.Push(gameLayer)
 	app.gameClosingObserverId = app.GameEventHandler.AddObserver(GameIsClosing, app.CloseGame)
 	return
 }

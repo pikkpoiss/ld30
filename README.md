@@ -8,10 +8,10 @@ You are trying to populate a solar system with life.  You can place Earth-like p
 ## TODO
 
   * [x] Come up with idea.
-  * [ ] Integrate twodee library
-  * [ ] Open window, blank screen
-  * [ ] Main game loop
-  * [ ] Render sun
+  * [x] Integrate twodee library
+  * [x] Open window, blank screen
+  * [x] Main game loop
+  * [x] Render sun
   * [ ] Drop planet when click
   * [ ] Have planet orbit sun
   * [ ] Multiple planets
