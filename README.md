@@ -1,8 +1,24 @@
-ld30
+LD30
 ====
 
-Ludum Dare 30 - theme 'Connected Worlds'
+Ludum Dare 30 - theme 'Connected Worlds'.
 
+You are trying to populate a solar system with life.  You can place Earth-like planets in orbit around a star.  Every planet pulls on each other so you need to balance the gravity wells of every object in the system.  When a planet falls into a tolerable "life zone", then its population grows according to a standard population growth curve.  If a planet goes too close to the sun it burns up, if it falls too far away, it freezes.  If a planet collides with another planet or the sun it is destroyed.  All of these have disastrous consequences for any life on the planet.  The goal is to have the highest possible aggregate population in the solar system before the sun goes supernova.
+
+# TODO
+
+  * [x] Come up with idea.
+  * [ ] Integrate twodee library
+  * [ ] Open window, blank screen
+  * [ ] Main game loop
+  * [ ] Render sun
+  * [ ] Drop planet when click
+  * [ ] Have planet orbit sun
+  * [ ] Multiple planets
+  * [ ] Placeholder art
+  * [ ] Music loading
+  * [ ] Heads up display of temp, population for planets
+    
 # Brainstorming
 Ideas
 
