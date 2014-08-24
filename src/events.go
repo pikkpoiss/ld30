@@ -22,11 +22,7 @@ type DropPlanetEvent struct {
 	Y float32
 }
 
-type ReleasePlanetEvent struct {
-	twodee.BasicGameEvent
-	P   twodee.Point
-	Mag float32
-}
+type ReleasePlanetEvent DropPlanetEvent
 
 func NewDropPlanetEvent(x, y float32) (e *DropPlanetEvent) {
 	e = &DropPlanetEvent{
@@ -37,11 +33,11 @@ func NewDropPlanetEvent(x, y float32) (e *DropPlanetEvent) {
 	return
 }
 
-func NewReleasePlanetEvent(x, y, m float32) (e *ReleasePlanetEvent) {
+func NewReleasePlanetEvent(x, y float32) (e *ReleasePlanetEvent) {
 	e = &ReleasePlanetEvent{
 		*twodee.NewBasicGameEvent(ReleasePlanet),
-		twodee.Pt(x, y),
-		m,
+		x,
+		y,
 	}
 	return
 }
