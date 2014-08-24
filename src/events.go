@@ -12,12 +12,20 @@ const (
 	ShowSplash
 	PauseMusic
 	PlayGameOverEffect
+	DisplayMessage
 	sentinel
 )
 
 const (
 	NumGameEventTypes = int(sentinel)
 )
+
+type DisplayMessageEvent struct {
+	twodee.BasicGameEvent
+	X       float32
+	Y       float32
+	Message string
+}
 
 type DropPlanetEvent struct {
 	twodee.BasicGameEvent
@@ -41,6 +49,16 @@ func NewReleasePlanetEvent(x, y float32) (e *ReleasePlanetEvent) {
 		*twodee.NewBasicGameEvent(ReleasePlanet),
 		x,
 		y,
+	}
+	return
+}
+
+func NewDisplayMessageEvent(x, y float32, message string) (e *DisplayMessageEvent) {
+	e = &DisplayMessageEvent{
+		*twodee.NewBasicGameEvent(DisplayMessage),
+		x,
+		y,
+		message,
 	}
 	return
 }

@@ -9,42 +9,53 @@ import (
 )
 
 type HudLayer struct {
-	text        *twodee.TextRenderer
-	regularFont *twodee.FontFace
-	planetFont  *twodee.FontFace
-	globalText  *twodee.TextCache
-	timeText    *twodee.TextCache
-	tempText    map[int]*twodee.TextCache
-	popText     map[int]*twodee.TextCache
-	bounds      twodee.Rectangle
-	App         *Application
-	game        *GameLayer
+	text            *twodee.TextRenderer
+	regularFont     *twodee.FontFace
+	planetFont      *twodee.FontFace
+	messageFont     *twodee.FontFace
+	messageText     *twodee.TextCache
+	globalText      *twodee.TextCache
+	timeText        *twodee.TextCache
+	tempText        map[int]*twodee.TextCache
+	popText         map[int]*twodee.TextCache
+	bounds          twodee.Rectangle
+	App             *Application
+	game            *GameLayer
+	messageListener int
 }
 
 func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error) {
 	var (
 		regularFont *twodee.FontFace
 		planetFont  *twodee.FontFace
+		messageFont *twodee.FontFace
 		background  = color.Transparent
-		font        = "assets/fonts/Exo-SemiBold.ttf"
+		exoFont     = "assets/fonts/Exo-SemiBold.ttf"
+		purFont     = "assets/fonts/Puritan-Regular.ttf"
 	)
-	if regularFont, err = twodee.NewFontFace(font, 24, color.RGBA{255, 255, 255, 255}, background); err != nil {
+	if regularFont, err = twodee.NewFontFace(exoFont, 24, color.RGBA{255, 255, 255, 255}, background); err != nil {
 		return
 	}
-	if planetFont, err = twodee.NewFontFace(font, 18, color.RGBA{255, 255, 255, 255}, background); err != nil {
+	if planetFont, err = twodee.NewFontFace(exoFont, 18, color.RGBA{255, 255, 255, 255}, background); err != nil {
+		return
+	}
+	if messageFont, err = twodee.NewFontFace(purFont, 18, color.RGBA{255, 243, 190, 255}, background); err != nil {
 		return
 	}
 	layer = &HudLayer{
 		regularFont: regularFont,
 		planetFont:  planetFont,
+		messageFont: messageFont,
 		tempText:    map[int]*twodee.TextCache{},
 		popText:     map[int]*twodee.TextCache{},
 		globalText:  twodee.NewTextCache(regularFont),
 		timeText:    twodee.NewTextCache(regularFont),
+		messageText: twodee.NewTextCache(messageFont),
 		App:         app,
 		bounds:      twodee.Rect(0, 0, 1024, 768),
 		game:        game,
 	}
+	layer.messageListener = layer.App.GameEventHandler.AddObserver(DisplayMessage, layer.OnDisplayMessage)
 	err = layer.Reset()
 	return
 }
@@ -61,6 +72,8 @@ func (l *HudLayer) Delete() {
 	}
 	l.globalText.Delete()
 	l.timeText.Delete()
+	l.messageText.Delete()
+	l.App.GameEventHandler.RemoveObserver(DisplayMessage, l.messageListener)
 }
 
 func (l *HudLayer) Render() {
@@ -146,4 +159,11 @@ func (l *HudLayer) Reset() (err error) {
 		return
 	}
 	return
+}
+
+func (l *HudLayer) OnDisplayMessage(evt twodee.GETyper) {
+	switch event := evt.(type) {
+	case *DisplayMessageEvent:
+		fmt.Printf("MESSAGE: %v\n", event.Message)
+	}
 }
