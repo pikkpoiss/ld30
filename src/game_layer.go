@@ -20,6 +20,7 @@ type GameLayer struct {
 	App                   *Application
 	Sim                   *Simulation
 	Starmap               *twodee.Batch
+	Cheevos               *Cheevos
 	MouseX                float32
 	MouseY                float32
 	DropPlanetListener    int
@@ -58,6 +59,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	if layer.Starmap, err = LoadMap("assets/starmap.tmx"); err != nil {
 		return
 	}
+	layer.Cheevos = NewCheevos(layer.App.GameEventHandler)
 	layer.DropPlanetListener = layer.App.GameEventHandler.AddObserver(DropPlanet, layer.OnDropPlanet)
 	layer.ReleasePlanetListener = layer.App.GameEventHandler.AddObserver(ReleasePlanet, layer.OnReleasePlanet)
 	return
@@ -75,6 +77,9 @@ func (l *GameLayer) Delete() {
 	}
 	if l.Starmap != nil {
 		l.Starmap.Delete()
+	}
+	if l.Cheevos != nil {
+		l.Cheevos.Delete()
 	}
 	l.App.GameEventHandler.RemoveObserver(DropPlanet, l.DropPlanetListener)
 	l.App.GameEventHandler.RemoveObserver(ReleasePlanet, l.ReleasePlanetListener)
@@ -147,6 +152,7 @@ func (l *GameLayer) Render() {
 
 func (l *GameLayer) Update(elapsed time.Duration) {
 	l.Sim.Update(elapsed)
+	l.Cheevos.Update(elapsed)
 	l.DurLeft -= elapsed
 	if l.DurLeft <= 0 {
 		l.DurLeft = time.Duration(0)

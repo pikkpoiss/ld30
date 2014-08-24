@@ -15,3 +15,6 @@ func NewCheevos(events *twodee.GameEventHandler) *Cheevos {
 
 func (c *Cheevos) Update(elapsed time.Duration) {
 }
+
+func (c *Cheevos) Delete() {
+}
