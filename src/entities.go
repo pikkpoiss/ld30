@@ -31,6 +31,7 @@ type PlanetaryBody struct {
 	Population           float32
 	MaxPopulation        float32
 	PopulationGrowthRate float32
+	Temperature          int32
 	State                PlanetaryState
 }
 
@@ -47,6 +48,7 @@ func NewSun() *PlanetaryBody {
 		Population:           0.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
+		Temperature:          27000000,
 	}
 	body.SetState(Sun)
 	return body
@@ -66,6 +68,7 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 		Population:           100.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0001,
+		Temperature:          72,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -129,9 +132,20 @@ func (p *PlanetaryBody) UpdatePopulation(elapsed time.Duration) {
 	}
 }
 
+func (p *PlanetaryBody) UpdateTemperature(elapsed time.Duration) {
+	if p.State == TooFar {
+		p.Temperature += (-400 - p.Temperature) / int32(elapsed/time.Millisecond)
+	} else if p.State == TooClose {
+		p.Temperature += (27000000 - p.Temperature) / int32(elapsed/time.Millisecond)
+	} else if p.State == Fertile {
+		p.Temperature += (72 - p.Temperature) / int32(elapsed/time.Millisecond)
+	}
+}
+
 func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	p.AnimatingEntity.Update(elapsed)
 	p.UpdatePopulation(elapsed)
+	p.UpdateTemperature(elapsed)
 	pos := p.Pos()
 	p.MoveTo(twodee.Pt(pos.X+p.Velocity.X, pos.Y+p.Velocity.Y))
 }
@@ -159,4 +173,8 @@ func (p *PlanetaryBody) SetState(state PlanetaryState) {
 
 func (p *PlanetaryBody) GetPopulation() int {
 	return int(p.Population)
+}
+
+func (p *PlanetaryBody) GetTemperature() int32 {
+	return int32(p.Temperature)
 }
