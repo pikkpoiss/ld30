@@ -24,7 +24,7 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 		background  = color.Transparent
 		font        = "assets/fonts/Roboto-Black.ttf"
 	)
-	if regularFont, err = twodee.NewFontFace(font, 12, color.RGBA{255, 255, 255, 255}, background); err != nil {
+	if regularFont, err = twodee.NewFontFace(font, 24, color.RGBA{255, 255, 255, 255}, background); err != nil {
 		return
 	}
 	layer = &HudLayer{
@@ -79,7 +79,7 @@ func (l *HudLayer) Render() {
 			pos := planet.Pos()
 			x, y := l.game.TileRenderer.WorldToScreenCoords(pos.X, pos.Y)
 			fmt.Printf("X %v Y %v\n", x, y)
-			l.text.Draw(texture, x, y)
+			l.text.Draw(texture, x-16, y-16)
 		}
 	}
 
