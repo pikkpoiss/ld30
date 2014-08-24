@@ -1,28 +1,32 @@
 package main
 
 import (
-	twodee "../libs/twodee"
 	"time"
+
+	twodee "../libs/twodee"
 )
 
 type GameLayer struct {
-	BatchRenderer      *twodee.BatchRenderer
-	TileRenderer       *twodee.TileRenderer
-	GlowRenderer       *GlowRenderer
-	Bounds             twodee.Rectangle
-	App                *Application
-	Sim                *Simulation
-	Starmap            *twodee.Batch
-	MouseX             float32
-	MouseY             float32
-	DropPlanetListener int
+	BatchRenderer         *twodee.BatchRenderer
+	TileRenderer          *twodee.TileRenderer
+	GlowRenderer          *GlowRenderer
+	Bounds                twodee.Rectangle
+	App                   *Application
+	Sim                   *Simulation
+	Starmap               *twodee.Batch
+	MouseX                float32
+	MouseY                float32
+	DropPlanetListener    int
+	ReleasePlanetListener int
+	phantomPlanet         *PlanetaryBody
 }
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	layer = &GameLayer{
-		App:    app,
-		Bounds: twodee.Rect(-28, -21, 28, 21),
-		Sim:    NewSimulation(),
+		App:           app,
+		Bounds:        twodee.Rect(-28, -21, 28, 21),
+		Sim:           NewSimulation(),
+		phantomPlanet: nil,
 	}
 	if layer.BatchRenderer, err = twodee.NewBatchRenderer(layer.Bounds, app.WinBounds); err != nil {
 		return
@@ -44,6 +48,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 		return
 	}
 	layer.DropPlanetListener = layer.App.GameEventHandler.AddObserver(DropPlanet, layer.OnDropPlanet)
+	layer.ReleasePlanetListener = layer.App.GameEventHandler.AddObserver(ReleasePlanet, layer.OnReleasePlanet)
 	return
 }
 
@@ -61,6 +66,7 @@ func (l *GameLayer) Delete() {
 		l.Starmap.Delete()
 	}
 	l.App.GameEventHandler.RemoveObserver(DropPlanet, l.DropPlanetListener)
+	l.App.GameEventHandler.RemoveObserver(ReleasePlanet, l.ReleasePlanetListener)
 }
 
 func (l *GameLayer) Render() {
@@ -75,6 +81,7 @@ func (l *GameLayer) Render() {
 		pos = p.Pos()
 		l.TileRenderer.Draw(p.Frame(), pos.X, pos.Y, 0, false, false)
 	}
+	// TODO: Render l.phantomPlanet.
 	l.GlowRenderer.EnableOutput()
 	l.TileRenderer.Unbind()
 
@@ -126,11 +133,15 @@ func (l *GameLayer) HandleEvent(evt twodee.Event) bool {
 			return false
 		}
 	case *twodee.MouseButtonEvent:
-		if event.Type != twodee.Press {
+		switch event.Type {
+		case twodee.Press:
+			l.App.GameEventHandler.Enqueue(NewDropPlanetEvent(l.MouseX, l.MouseY))
+		case twodee.Release:
+			var mag float32 = 0.001
+			l.App.GameEventHandler.Enqueue(NewReleasePlanetEvent(l.MouseX, l.MouseY, mag))
+		default:
 			break
 		}
-		l.App.GameEventHandler.Enqueue(NewDropPlanetEvent(l.MouseX, l.MouseY))
-		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayPlanetDropEffect))
 	case *twodee.MouseMoveEvent:
 		l.MouseX, l.MouseY = l.TileRenderer.ScreenToWorldCoords(event.X, event.Y)
 	}
@@ -140,7 +151,19 @@ func (l *GameLayer) HandleEvent(evt twodee.Event) bool {
 func (l *GameLayer) OnDropPlanet(evt twodee.GETyper) {
 	switch event := evt.(type) {
 	case *DropPlanetEvent:
-		l.Sim.AddPlanet(event.X, event.Y)
+		l.phantomPlanet = NewPlanet(event.X, event.Y)
+	}
+}
+
+func (l *GameLayer) OnReleasePlanet(evt twodee.GETyper) {
+	switch event := evt.(type) {
+	case *ReleasePlanetEvent:
+		// do something.
+		if l.phantomPlanet != nil {
+			l.phantomPlanet.Velocity = event.P.Scale(event.Mag)
+			l.Sim.AddPlanet(l.phantomPlanet)
+			l.phantomPlanet = nil
+		}
 	}
 }
 

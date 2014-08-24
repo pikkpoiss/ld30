@@ -67,8 +67,8 @@ func (s *Simulation) NBodyUpdate(elapsed time.Duration) {
 	}
 }
 
-func (s *Simulation) AddPlanet(x, y float32) {
-	s.Planets = append(s.Planets, NewPlanet(x, y))
+func (s *Simulation) AddPlanet(p *PlanetaryBody) {
+	s.Planets = append(s.Planets, p)
 }
 
 func (s *Simulation) SetPopulation(population int) {
