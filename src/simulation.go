@@ -46,6 +46,7 @@ func (s *Simulation) Update(elapsed time.Duration) {
 		popSum = 0
 	)
 	s.nBodyUpdate(elapsed)
+	s.Sun.Update(elapsed)
 	for _, p := range s.Planets {
 		popSum += p.GetPopulation()
 		p.Update(elapsed)

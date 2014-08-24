@@ -79,9 +79,11 @@ func (l *GameLayer) Delete() {
 func (l *GameLayer) Render() {
 	var (
 		pos twodee.Point
+		radians float64
 	)
 	l.count = (l.count + 2) % 100000000
-	var glow = math.Sin(0.0174532925*float64(l.count)) * 0.1
+	radians = 0.0174532925*float64(l.count)
+	var glow = math.Sin(radians) * 0.1
 	l.GlowRenderer.Bind()
 	l.GlowRenderer.SetStrength(float32(0.3 + glow))
 
@@ -100,7 +102,7 @@ func (l *GameLayer) Render() {
 
 	l.TileRenderer.Bind()
 	pos = l.Sim.Sun.Pos()
-	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, 0, false, false)
+	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, float32(radians), false, false)
 
 	l.GlowRenderer.Unbind()
 
@@ -111,7 +113,7 @@ func (l *GameLayer) Render() {
 	l.BatchRenderer.Unbind()
 
 	l.TileRenderer.Bind()
-	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, 0, false, false)
+	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, float32(radians), false, false)
 	for _, p := range l.Sim.Planets {
 		pos = p.Pos()
 		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)

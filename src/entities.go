@@ -20,11 +20,11 @@ const (
 )
 
 var PlanetaryAnimations = map[PlanetaryState][]int{
-	Sun:      []int{0},
-	Fertile:  []int{4},
-	TooClose: []int{8},
-	TooFar:   []int{12},
-	Phantom:  []int{16},
+	Sun:      []int{0, 1, 2, 3},
+	Fertile:  []int{8},
+	TooClose: []int{16},
+	TooFar:   []int{24},
+	Phantom:  []int{32},
 }
 
 type PlanetaryBody struct {
@@ -179,7 +179,7 @@ func (p *PlanetaryBody) Update(elapsed time.Duration) {
 }
 
 func (p *PlanetaryBody) HasState(state PlanetaryState) bool {
-	return p.State & state == state
+	return p.State&state == state
 }
 
 func (p *PlanetaryBody) RemState(state PlanetaryState) {
