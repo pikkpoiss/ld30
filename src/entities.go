@@ -1,10 +1,10 @@
 package main
 
 import (
-	twodee "../libs/twodee"
 	"math"
-	"math/rand"
 	"time"
+
+	twodee "../libs/twodee"
 )
 
 type PlanetaryState int32
@@ -26,11 +26,13 @@ var PlanetaryAnimations = map[PlanetaryState][]int{
 
 type PlanetaryBody struct {
 	*twodee.AnimatingEntity
+	// Velocity is in units/ms.
 	Velocity             twodee.Point
 	Mass                 float32
 	Population           float32
 	MaxPopulation        float32
 	PopulationGrowthRate float32
+	Temperature          int32
 	State                PlanetaryState
 }
 
@@ -47,6 +49,7 @@ func NewSun() *PlanetaryBody {
 		Population:           0.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
+		Temperature:          27000000,
 	}
 	body.SetState(Sun)
 	return body
@@ -61,11 +64,13 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Velocity:             twodee.Pt(rand.Float32(), rand.Float32()),
+		Velocity: twodee.Pt(0, 0),
+		//		Velocity:             twodee.Pt(rand.Float32(), rand.Float32()),
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0001,
+		Temperature:          72,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -83,6 +88,13 @@ func (p *PlanetaryBody) MoveToward(sc twodee.Point) {
 	)
 	p.Velocity.X += (vx - p.Velocity.X)
 	p.Velocity.Y += (vy - p.Velocity.Y)
+}
+
+// Calculates the PlanetaryBody's new velocity vector given an acceleration vector and time.
+func (p *PlanetaryBody) CalcNewVelocity(av twodee.Point, elapsed time.Duration) {
+	// Essentially, v = v0 + at
+	av = av.Scale(float32(elapsed.Seconds() * 1e3))
+	p.Velocity = p.Velocity.Add(av)
 }
 
 func (p *PlanetaryBody) GravitateToward(sc twodee.Point) {
@@ -129,11 +141,24 @@ func (p *PlanetaryBody) UpdatePopulation(elapsed time.Duration) {
 	}
 }
 
+func (p *PlanetaryBody) UpdateTemperature(elapsed time.Duration) {
+	if p.State == TooFar {
+		p.Temperature += (-400 - p.Temperature) / int32(elapsed/time.Millisecond)
+	} else if p.State == TooClose {
+		p.Temperature += (5000 - p.Temperature) / int32(elapsed/time.Millisecond)
+	} else if p.State == Fertile {
+		p.Temperature += (72 - p.Temperature) / int32(elapsed/time.Millisecond)
+	}
+}
+
 func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	p.AnimatingEntity.Update(elapsed)
 	p.UpdatePopulation(elapsed)
+	p.UpdateTemperature(elapsed)
 	pos := p.Pos()
-	p.MoveTo(twodee.Pt(pos.X+p.Velocity.X, pos.Y+p.Velocity.Y))
+	ms := float32(elapsed.Seconds() * 1e3)
+	dist := p.Velocity.Scale(ms)
+	p.MoveTo(twodee.Pt(pos.X+dist.X, pos.Y+dist.Y))
 }
 
 func (p *PlanetaryBody) RemState(state PlanetaryState) {
@@ -159,4 +184,8 @@ func (p *PlanetaryBody) SetState(state PlanetaryState) {
 
 func (p *PlanetaryBody) GetPopulation() int {
 	return int(p.Population)
+}
+
+func (p *PlanetaryBody) GetTemperature() int32 {
+	return int32(p.Temperature)
 }

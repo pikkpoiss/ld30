@@ -79,6 +79,13 @@ func (l *HudLayer) Render() {
 			pt := l.game.WorldToScreenCoords(planet.Pos())
 			l.text.Draw(texture, pt.X+24, pt.Y-72)
 		}
+		//Display Individual Planet Temperatures
+		textCache.SetText(strconv.Itoa(int(planet.GetTemperature())) + "°F")
+		texture = textCache.Texture
+		if texture != nil {
+			pt := l.game.WorldToScreenCoords(planet.Pos())
+			l.text.Draw(texture, pt.X, pt.Y+48)
+		}
 	}
 
 	l.text.Unbind()
