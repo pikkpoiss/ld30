@@ -20,7 +20,7 @@ func (a *AudioSystem) PlayPlanetDropEffect(e twodee.GETyper) {
 
 func (a *AudioSystem) Delete() {
 	a.app.GameEventHandler.RemoveObserver(PlayBackgroundMusic, a.backgroundMusicObserverId)
-	a.app.GameEventHandler.RemoveObserver(PlayPlanetDropEffect, a.planetDropEffectObserverId)
+	a.app.GameEventHandler.RemoveObserver(DropPlanet, a.planetDropEffectObserverId)
 	a.backgroundMusic.Delete()
 	a.planetDropEffect.Delete()
 }
@@ -43,6 +43,6 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 	}
 	planetDropEffect.SetVolume(60)
 	audioSystem.backgroundMusicObserverId = app.GameEventHandler.AddObserver(PlayBackgroundMusic, audioSystem.PlayBackgroundMusic)
-	audioSystem.planetDropEffectObserverId = app.GameEventHandler.AddObserver(PlayPlanetDropEffect, audioSystem.PlayPlanetDropEffect)
+	audioSystem.planetDropEffectObserverId = app.GameEventHandler.AddObserver(DropPlanet, audioSystem.PlayPlanetDropEffect)
 	return
 }
