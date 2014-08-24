@@ -26,8 +26,8 @@ const (
 var PlanetaryAnimations = map[PlanetaryState][]int{
 	Sun:               []int{0, 1, 2, 3},
 	Fertile:           []int{8, 9, 10, 11, 12, 13, 14, 15},
-	TooClose:          []int{16},
-	TooFar:            []int{24},
+	TooClose:          []int{16, 17, 18, 19, 20, 21, 22, 23},
+	TooFar:            []int{24, 25, 26, 27, 28, 29, 30, 31},
 	Phantom:           []int{32},
 	Dying | Exploding: []int{0, 1, 2, 3},
 	Dying | Colliding: []int{0, 1, 2, 3},
