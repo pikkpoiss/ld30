@@ -131,7 +131,6 @@ func (l *GameLayer) HandleEvent(evt twodee.Event) bool {
 			break
 		}
 		l.App.GameEventHandler.Enqueue(NewDropPlanetEvent(l.MouseX, l.MouseY))
-		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayPlanetDropEffect))
 	case *twodee.MouseMoveEvent:
 		l.MouseX, l.MouseY = l.TileRenderer.ScreenToWorldCoords(event.X, event.Y)
 	}
