@@ -1,11 +1,10 @@
 package main
 
 import (
-	twodee "../libs/twodee"
-	//"fmt"
 	"math"
-	"math/rand"
 	"time"
+
+	twodee "../libs/twodee"
 )
 
 type PlanetaryState int32
@@ -27,6 +26,7 @@ var PlanetaryAnimations = map[PlanetaryState][]int{
 
 type PlanetaryBody struct {
 	*twodee.AnimatingEntity
+	// Velocity is in units/ms.
 	Velocity             twodee.Point
 	Mass                 float32
 	Population           float32
@@ -62,7 +62,8 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Velocity:             twodee.Pt(rand.Float32(), rand.Float32()),
+		Velocity: twodee.Pt(0, 0),
+		//		Velocity:             twodee.Pt(rand.Float32(), rand.Float32()),
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
@@ -84,6 +85,13 @@ func (p *PlanetaryBody) MoveToward(sc twodee.Point) {
 	)
 	p.Velocity.X += (vx - p.Velocity.X)
 	p.Velocity.Y += (vy - p.Velocity.Y)
+}
+
+// Calculates the PlanetaryBody's new velocity vector given an acceleration vector and time.
+func (p *PlanetaryBody) CalcNewVelocity(av twodee.Point, elapsed time.Duration) {
+	// Essentially, v = v0 + at
+	av = av.Scale(float32(elapsed.Seconds() * 1e3))
+	p.Velocity = p.Velocity.Add(av)
 }
 
 func (p *PlanetaryBody) GravitateToward(sc twodee.Point) {
@@ -144,7 +152,9 @@ func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	p.AnimatingEntity.Update(elapsed)
 	p.UpdatePopulation(elapsed)
 	pos := p.Pos()
-	p.MoveTo(twodee.Pt(pos.X+p.Velocity.X, pos.Y+p.Velocity.Y))
+	ms := float32(elapsed.Seconds() * 1e3)
+	dist := p.Velocity.Scale(ms)
+	p.MoveTo(twodee.Pt(pos.X+dist.X, pos.Y+dist.Y))
 }
 
 func (p *PlanetaryBody) RemState(state PlanetaryState) {
