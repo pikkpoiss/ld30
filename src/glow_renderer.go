@@ -17,9 +17,6 @@ uniform float BlurScale;
 uniform float BlurStrength;
 uniform vec2 BufferDimensions;
 out vec4 v_FragData;
-//const int BlurAmount = 4;
-//const float BlurScale = 1.0;
-//const float BlurStrength = 0.4;
 vec2 TexelSize = vec2(1.0 / BufferDimensions.x, 1.0 / BufferDimensions.y);
 
 float Gaussian (float x, float deviation)
@@ -219,7 +216,7 @@ func (r *GlowRenderer) Draw() (err error) {
 	r.textureLoc.AttribPointer(2, gl.FLOAT, false, 5*4, uintptr(3*4))
 	r.positionLoc.EnableArray()
 	r.textureLoc.EnableArray()
-	r.blurAmountLoc.Uniform1i(6)
+	r.blurAmountLoc.Uniform1i(4)
 	r.blurScaleLoc.Uniform1f(1.0)
 	r.blurStrengthLoc.Uniform1f(0.2)
 	r.bufferDimensionsLoc.Uniform2f(float32(r.width), float32(r.height))
