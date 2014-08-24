@@ -76,10 +76,8 @@ func (l *HudLayer) Render() {
 		textCache.SetText(strconv.Itoa(planet.GetPopulation()))
 		texture = textCache.Texture
 		if texture != nil {
-			pos := planet.Pos()
-			x, y := l.game.TileRenderer.WorldToScreenCoords(pos.X, pos.Y)
-			fmt.Printf("X %v Y %v\n", x, y)
-			l.text.Draw(texture, x, y)
+			pt := l.game.WorldToScreenCoords(planet.Pos())
+			l.text.Draw(texture, pt.X, pt.Y)
 		}
 	}
 
