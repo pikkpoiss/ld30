@@ -12,13 +12,22 @@ You are trying to populate a solar system with life.  You can place Earth-like p
   * [x] Open window, blank screen
   * [x] Main game loop
   * [x] Render sun
-  * [ ] Drop planet when click
-  * [ ] Have planet orbit sun
-  * [ ] Multiple planets
-  * [ ] Placeholder art
+  * [x] Drop planet when click
+  * [x] Have planet orbit sun
+  * [x] Multiple planets
+  * [x] Placeholder art
   * [x] Music loading
   * [ ] Heads up display of temp, population for planets
-    
+  * [ ] Different types of planets?
+  * [ ] Planet collisions
+  * [ ] Production art
+  * [ ] Production music
+  * [ ] Production sound effects
+  * [ ] Splash screen
+  * [ ] End game mechanic
+  * [ ] Final score screen
+  * [ ] Planet quota / pool of available?
+
 ## Setup
 
 Complete the setup steps for the twodee lib.
