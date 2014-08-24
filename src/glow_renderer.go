@@ -216,9 +216,9 @@ func (r *GlowRenderer) Draw() (err error) {
 	r.textureLoc.AttribPointer(2, gl.FLOAT, false, 5*4, uintptr(3*4))
 	r.positionLoc.EnableArray()
 	r.textureLoc.EnableArray()
-	r.blurAmountLoc.Uniform1i(4)
+	r.blurAmountLoc.Uniform1i(6)
 	r.blurScaleLoc.Uniform1f(1.0)
-	r.blurStrengthLoc.Uniform1f(0.2)
+	r.blurStrengthLoc.Uniform1f(0.4)
 	r.bufferDimensionsLoc.Uniform2f(float32(r.width), float32(r.height))
 
 	r.BlurFb.Bind()
