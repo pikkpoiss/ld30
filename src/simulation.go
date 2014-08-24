@@ -13,19 +13,36 @@ const (
 )
 
 type Simulation struct {
-	Sun     *PlanetaryBody
-	Planets []*PlanetaryBody
+	Sun                 *PlanetaryBody
+	Planets             []*PlanetaryBody
+	AggregatePopulation int
 }
 
 func NewSimulation() *Simulation {
 	return &Simulation{
-		Sun:     NewSun(),
-		Planets: []*PlanetaryBody{},
+		Sun:                 NewSun(),
+		Planets:             []*PlanetaryBody{},
+		AggregatePopulation: 0,
 	}
 }
 
 func (s *Simulation) Update(elapsed time.Duration) {
 	s.NBodyUpdate(elapsed)
+	var popSum = 0
+	for _, p := range s.Planets {
+		popSum += p.GetPopulation()
+		p.Update(elapsed)
+		dist = float64(p.Pos().DistanceTo(s.Sun.Pos()))
+		switch {
+		case dist < 10:
+			p.SetState(TooClose)
+		case dist > 15:
+			p.SetState(TooFar)
+		default:
+			p.SetState(Fertile)
+		}
+	}
+	s.SetPopulation(popSum)
 }
 
 func (s *Simulation) NBodyUpdate(elapsed time.Duration) {
@@ -43,23 +60,18 @@ func (s *Simulation) NBodyUpdate(elapsed time.Duration) {
 		}
 		// Don't forget the gravitational constant and p's mass.
 		var accel = force.Scale(GravConst).Scale(1 / p.Mass)
-		//		}
 		p.CalcNewVelocity(accel, elapsed)
-	}
-	for _, p := range s.Planets {
-		p.Update(elapsed)
-		dist = float64(p.Pos().DistanceTo(s.Sun.Pos()))
-		switch {
-		case dist < 10:
-			p.SetState(TooClose)
-		case dist > 15:
-			p.SetState(TooFar)
-		default:
-			p.SetState(Fertile)
-		}
 	}
 }
 
 func (s *Simulation) AddPlanet(x, y float32) {
 	s.Planets = append(s.Planets, NewPlanet(x, y))
+}
+
+func (s *Simulation) SetPopulation(population int) {
+	s.AggregatePopulation = population
+}
+
+func (s *Simulation) GetPopulation() int {
+	return s.AggregatePopulation
 }
