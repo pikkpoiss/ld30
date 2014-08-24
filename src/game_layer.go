@@ -6,6 +6,10 @@ import (
 	twodee "../libs/twodee"
 )
 
+const (
+	magicVelocityScalingFactor = 1e-3
+)
+
 type GameLayer struct {
 	BatchRenderer         *twodee.BatchRenderer
 	TileRenderer          *twodee.TileRenderer
@@ -143,8 +147,7 @@ func (l *GameLayer) HandleEvent(evt twodee.Event) bool {
 		case twodee.Press:
 			l.App.GameEventHandler.Enqueue(NewDropPlanetEvent(l.MouseX, l.MouseY))
 		case twodee.Release:
-			var mag float32 = 0.001
-			l.App.GameEventHandler.Enqueue(NewReleasePlanetEvent(l.MouseX, l.MouseY, mag))
+			l.App.GameEventHandler.Enqueue(NewReleasePlanetEvent(l.MouseX, l.MouseY))
 		default:
 			break
 		}
@@ -168,14 +171,10 @@ func (l *GameLayer) OnReleasePlanet(evt twodee.GETyper) {
 		// do something.
 		if l.phantomPlanet != nil {
 			p := l.phantomPlanet.Pos()
-			relVector := twodee.Pt(event.P.X-p.X, event.P.Y-p.Y)
-			// TODO: I'm not really sure we actually need to scale
-			// the relative vector by a magnitude, since we get
-			// that for free by virtue of the relativeness of the
-			// vector to some point p0.
-			// Still, we need to reduce it by some amount so the
-			// planet doesn't go careening off screen immediately.
-			relVector = relVector.Scale(event.Mag)
+			relVector := twodee.Pt(event.X-p.X, event.Y-p.Y)
+			// Since the vector's magnitude is still too big, we
+			// need to scale it down by some magic factor.
+			relVector = relVector.Scale(magicVelocityScalingFactor)
 			l.phantomPlanet.Velocity = relVector
 			l.phantomPlanet.RemState(Phantom)
 			l.Sim.AddPlanet(l.phantomPlanet)
