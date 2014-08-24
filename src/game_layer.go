@@ -1,9 +1,9 @@
 package main
 
 import (
-	"time"
-
 	twodee "../libs/twodee"
+	"math"
+	"time"
 )
 
 const (
@@ -26,6 +26,7 @@ type GameLayer struct {
 	ReleasePlanetListener int
 	DurLeft               time.Duration
 	phantomPlanet         *PlanetaryBody
+	count                 int64
 }
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
@@ -36,6 +37,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 		Sim:           NewSimulation(bounds, app.GameEventHandler),
 		DurLeft:       startDur,
 		phantomPlanet: nil,
+		count:         0,
 	}
 	if layer.BatchRenderer, err = twodee.NewBatchRenderer(layer.Bounds, app.WinBounds); err != nil {
 		return
@@ -82,7 +84,10 @@ func (l *GameLayer) Render() {
 	var (
 		pos twodee.Point
 	)
+	l.count = (l.count + 2) % 100000000
+	var glow = math.Sin(0.0174532925*float64(l.count)) * 0.1
 	l.GlowRenderer.Bind()
+	l.GlowRenderer.SetStrength(float32(0.3 + glow))
 
 	l.TileRenderer.Bind()
 	l.GlowRenderer.DisableOutput()

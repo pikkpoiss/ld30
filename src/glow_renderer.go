@@ -172,6 +172,10 @@ func (r *GlowRenderer) initFramebuffer(w, h int) (fb gl.Framebuffer, tex gl.Text
 	return
 }
 
+func (r *GlowRenderer) SetStrength(s float32) {
+	r.strength = s
+}
+
 func (r *GlowRenderer) GetError() error {
 	if e := gl.GetError(); e != 0 {
 		return fmt.Errorf("OpenGL error: %X", e)
