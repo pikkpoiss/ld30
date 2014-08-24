@@ -1,7 +1,15 @@
 package main
 
 import (
+	"math"
 	"time"
+)
+
+const (
+	// 6.67e-11 m^3kg^-1s^-2
+	GravitationalConst = 6.67e-11
+	// Play GC in m^3kg^-1ms^-2
+	GravConst = 5e-8
 )
 
 type Simulation struct {
@@ -19,19 +27,15 @@ func NewSimulation() *Simulation {
 }
 
 func (s *Simulation) Update(elapsed time.Duration) {
-	var centroid = s.Sun.Pos().Scale(s.Sun.Mass)
-	var weight = s.Sun.Mass
-	var PopulationAggregator = 0
+	var (
+		dist   float32
+		popSum = 0
+	)
+	s.NBodyUpdate(elapsed)
 	for _, p := range s.Planets {
-		centroid = centroid.Add(p.Pos().Scale(p.Mass))
-		weight += p.Mass
-	}
-	centroid = centroid.Scale(1.0 / weight)
-	for _, p := range s.Planets {
-		p.GravitateToward(centroid)
+		popSum += p.GetPopulation()
 		p.Update(elapsed)
-		PopulationAggregator += p.GetPopulation()
-		dist := p.Pos().DistanceTo(s.Sun.Pos())
+		dist = p.Pos().DistanceTo(s.Sun.Pos())
 		switch {
 		case dist < 10:
 			p.SetState(TooClose)
@@ -41,7 +45,26 @@ func (s *Simulation) Update(elapsed time.Duration) {
 			p.SetState(Fertile)
 		}
 	}
-	s.SetPopulation(PopulationAggregator)
+	s.SetPopulation(popSum)
+}
+
+func (s *Simulation) NBodyUpdate(elapsed time.Duration) {
+	var dist float64
+	for _, p := range s.Planets {
+		// First, we must handle the sun...
+		dist = float64(s.Sun.Pos().DistanceTo(p.Pos()))
+		var force = s.Sun.Pos().Sub(p.Pos()).Scale(s.Sun.Mass * p.Mass).Scale(float32(math.Pow(dist, -3)))
+		for _, p2 := range s.Planets {
+			if p == p2 {
+				continue
+			}
+			dist = float64(p2.Pos().DistanceTo(p.Pos()))
+			force = force.Add(p2.Pos().Sub(p.Pos()).Scale(p2.Mass * p.Mass).Scale(float32(math.Pow(dist, -3))))
+		}
+		// Don't forget the gravitational constant and p's mass.
+		var accel = force.Scale(GravConst).Scale(1 / p.Mass)
+		p.CalcNewVelocity(accel, elapsed)
+	}
 }
 
 func (s *Simulation) AddPlanet(x, y float32) {

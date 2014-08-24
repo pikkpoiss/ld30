@@ -191,7 +191,10 @@ func (r *GlowRenderer) GetError() error {
 
 func (r *GlowRenderer) Delete() error {
 	r.GlowFb.Delete()
+	r.GlowTex.Delete()
 	r.BlurFb.Delete()
+	r.BlurTex.Delete()
+	r.coords.Delete()
 	return r.GetError()
 }
 
@@ -204,7 +207,6 @@ func (r *GlowRenderer) Bind() error {
 	gl.StencilMask(0xFF) // Write to buffer
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.STENCIL_BUFFER_BIT)
 	gl.StencilMask(0x00) // Don't write to buffer
-
 	return nil
 }
 
@@ -214,8 +216,6 @@ func (r *GlowRenderer) Draw() (err error) {
 	r.coords.Bind(gl.ARRAY_BUFFER)
 	r.positionLoc.AttribPointer(3, gl.FLOAT, false, 5*4, uintptr(0))
 	r.textureLoc.AttribPointer(2, gl.FLOAT, false, 5*4, uintptr(3*4))
-	r.positionLoc.EnableArray()
-	r.textureLoc.EnableArray()
 	r.blurAmountLoc.Uniform1i(6)
 	r.blurScaleLoc.Uniform1f(1.0)
 	r.blurStrengthLoc.Uniform1f(0.4)
@@ -223,17 +223,14 @@ func (r *GlowRenderer) Draw() (err error) {
 
 	r.BlurFb.Bind()
 	gl.Viewport(0, 0, r.width, r.height)
-	gl.ClearColor(0.0, 0.0, 0.0, 0.0)
-	gl.Clear(gl.COLOR_BUFFER_BIT)
 	gl.ActiveTexture(gl.TEXTURE0)
 	r.GlowTex.Bind(gl.TEXTURE_2D)
 	r.orientationLoc.Uniform1i(0)
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
 	r.BlurFb.Unbind()
-	gl.Viewport(0, 0, r.oldwidth, r.oldheight)
 
+	gl.Viewport(0, 0, r.oldwidth, r.oldheight)
 	gl.BlendFunc(gl.ONE, gl.ONE)
-	gl.ActiveTexture(gl.TEXTURE0)
 	r.BlurTex.Bind(gl.TEXTURE_2D)
 	r.orientationLoc.Uniform1i(1)
 	gl.DrawArrays(gl.TRIANGLE_STRIP, 0, 4)
@@ -244,28 +241,23 @@ func (r *GlowRenderer) Draw() (err error) {
 }
 
 func (r *GlowRenderer) Unbind() error {
-	r.GlowFb.Unbind()
 	gl.Viewport(0, 0, r.oldwidth, r.oldheight)
+	r.GlowFb.Unbind()
 	gl.Disable(gl.STENCIL_TEST)
-	return r.GetError()
+	return nil
 }
 
 func (r *GlowRenderer) DisableOutput() {
 	gl.ColorMask(false, false, false, false)
-	gl.DepthMask(false)
 	gl.StencilFunc(gl.NEVER, 1, 0xFF)                // Never pass
 	gl.StencilOp(gl.REPLACE, gl.REPLACE, gl.REPLACE) // Replace to ref=1
 	gl.StencilMask(0xFF)                             // Write to buffer
-	//gl.Enable(gl.ALPHA_TEST)
-	//gl.AlphaFunc(gl.GREATER, 0)
 }
 
 func (r *GlowRenderer) EnableOutput() {
 	gl.ColorMask(true, true, true, true)
-	gl.DepthMask(true)
-	gl.StencilMask(0x00)                // No more writing
+	gl.StencilMask(0x00)              // No more writing
 	gl.StencilFunc(gl.EQUAL, 0, 0xFF) // Only pass where stencil is 0
-	//gl.Disable(gl.ALPHA_TEST)
 }
 
 // Convenience function for glGetIntegerv

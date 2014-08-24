@@ -131,10 +131,10 @@ func main() {
 			app.Draw()
 			app.Context.Window.SwapBuffers()
 			last_render = current_time
+			app.Context.Events.Poll()
+			app.GameEventHandler.Poll()
+			app.ProcessEvents()
 		}
-		app.Context.Events.Poll()
-		app.GameEventHandler.Poll()
-		app.ProcessEvents()
 		current_time = time.Now()
 	}
 }
