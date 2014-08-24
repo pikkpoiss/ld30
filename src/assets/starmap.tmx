@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="64" height="48" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="starmap.fw" tilewidth="16" tileheight="16">
+  <image source="starmap.fw.png" width="64" height="64"/>
+ </tileset>
+ <layer name="tiles" width="64" height="48">
+  <data encoding="base64" compression="zlib">
+   eJzt2ckOhSAMQFGn//9mV24aIkIsne7ZuHkxdKAQ37YBfaf1ApRd1gsogjzHQa1i0KjTrvx+aeZ8GVnXMfF+oCX7XUiyOAc4e/yhJrXJuWfdD3v/JzBg3RerjMbZu4NWyRug4RJP4I9e8H7PoN/Xq/YNYBa9Cdjzug+9nK3W89xrfbzr5U2zvyrULEqM/L/3TZR6vmnFYD2/JfoRLRn2X8uquLLm7/F1bozkwdtsnLGy7pFmd4b9kCGGqG7Q9gCq
+  </data>
+ </layer>
+</map>

@@ -99,12 +99,18 @@ type GlowRenderer struct {
 	height              int
 	oldwidth            int
 	oldheight           int
+	blur                int
+	strength            float32
+	scale               float32
 }
 
-func NewGlowRenderer(w, h int) (r *GlowRenderer, err error) {
+func NewGlowRenderer(w, h int, blur int, strength float32, scale float32) (r *GlowRenderer, err error) {
 	r = &GlowRenderer{
-		width:  w,
-		height: h,
+		width:    w,
+		height:   h,
+		blur:     blur,
+		strength: strength,
+		scale:    scale,
 	}
 	_, _, r.oldwidth, r.oldheight = GetInteger4(gl.VIEWPORT)
 	if r.shader, err = twodee.BuildProgram(GLOW_VERTEX, GLOW_FRAGMENT); err != nil {
@@ -216,9 +222,9 @@ func (r *GlowRenderer) Draw() (err error) {
 	r.coords.Bind(gl.ARRAY_BUFFER)
 	r.positionLoc.AttribPointer(3, gl.FLOAT, false, 5*4, uintptr(0))
 	r.textureLoc.AttribPointer(2, gl.FLOAT, false, 5*4, uintptr(3*4))
-	r.blurAmountLoc.Uniform1i(6)
-	r.blurScaleLoc.Uniform1f(1.0)
-	r.blurStrengthLoc.Uniform1f(0.4)
+	r.blurAmountLoc.Uniform1i(r.blur)
+	r.blurScaleLoc.Uniform1f(r.scale)
+	r.blurStrengthLoc.Uniform1f(r.strength)
 	r.bufferDimensionsLoc.Uniform2f(float32(r.width), float32(r.height))
 
 	r.BlurFb.Bind()

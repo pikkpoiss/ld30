@@ -2,7 +2,6 @@ package main
 
 import (
 	twodee "../libs/twodee"
-	"fmt"
 	"time"
 )
 
@@ -13,6 +12,7 @@ type GameLayer struct {
 	Bounds             twodee.Rectangle
 	App                *Application
 	Sim                *Simulation
+	Starmap            *twodee.Batch
 	MouseX             float32
 	MouseY             float32
 	DropPlanetListener int
@@ -37,7 +37,10 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	if layer.TileRenderer, err = twodee.NewTileRenderer(layer.Bounds, app.WinBounds, tilem); err != nil {
 		return
 	}
-	if layer.GlowRenderer, err = NewGlowRenderer(96, 64); err != nil {
+	if layer.GlowRenderer, err = NewGlowRenderer(192, 128, 8, 0.3, 1.0); err != nil {
+		return
+	}
+	if layer.Starmap, err = LoadMap("assets/starmap.tmx"); err != nil {
 		return
 	}
 	layer.DropPlanetListener = layer.App.GameEventHandler.AddObserver(DropPlanet, layer.OnDropPlanet)
@@ -54,38 +57,52 @@ func (l *GameLayer) Delete() {
 	if l.GlowRenderer != nil {
 		l.GlowRenderer.Delete()
 	}
+	if l.Starmap != nil {
+		l.Starmap.Delete()
+	}
 	l.App.GameEventHandler.RemoveObserver(DropPlanet, l.DropPlanetListener)
 }
 
 func (l *GameLayer) Render() {
 	var (
-		err error
 		pos twodee.Point
 	)
+	l.GlowRenderer.Bind()
+
 	l.TileRenderer.Bind()
-	if err = l.GlowRenderer.Bind(); err != nil {
-		fmt.Printf("Problem binding glow: %v\n", err)
-	}
 	l.GlowRenderer.DisableOutput()
 	for _, p := range l.Sim.Planets {
 		pos = p.Pos()
 		l.TileRenderer.Draw(p.Frame(), pos.X, pos.Y, 0, false, false)
 	}
 	l.GlowRenderer.EnableOutput()
+	l.TileRenderer.Unbind()
+
+	l.BatchRenderer.Bind()
+	l.BatchRenderer.Draw(l.Starmap, l.Bounds.Min.X, l.Bounds.Min.Y, 0)
+	l.BatchRenderer.Unbind()
+
+	l.TileRenderer.Bind()
 	pos = l.Sim.Sun.Pos()
 	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, 0, false, false)
-	if err = l.GlowRenderer.Unbind(); err != nil {
-		fmt.Printf("Problem unbinding glow: %v\n", err)
-	}
+
+	l.GlowRenderer.Unbind()
+
+	l.TileRenderer.Unbind()
+
+	l.BatchRenderer.Bind()
+	l.BatchRenderer.Draw(l.Starmap, l.Bounds.Min.X, l.Bounds.Min.Y, 0)
+	l.BatchRenderer.Unbind()
+
+	l.TileRenderer.Bind()
 	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, 0, false, false)
 	for _, p := range l.Sim.Planets {
 		pos = p.Pos()
 		l.TileRenderer.Draw(p.Frame(), pos.X, pos.Y, 0, false, false)
 	}
 	l.TileRenderer.Unbind()
-	if err = l.GlowRenderer.Draw(); err != nil {
-		fmt.Printf("Problem drawing glow: %v\n", err)
-	}
+
+	l.GlowRenderer.Draw()
 	return
 }
 
