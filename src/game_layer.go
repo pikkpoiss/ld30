@@ -19,7 +19,7 @@ type GameLayer struct {
 }
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
-	var bounds = twodee.Rect(-28, -21, 28, 21)
+	var bounds = twodee.Rect(-32, -24, 32, 24)
 	layer = &GameLayer{
 		App:    app,
 		Bounds: bounds,
@@ -38,7 +38,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	if layer.TileRenderer, err = twodee.NewTileRenderer(layer.Bounds, app.WinBounds, tilem); err != nil {
 		return
 	}
-	if layer.GlowRenderer, err = NewGlowRenderer(192, 128, 8, 0.3, 1.0); err != nil {
+	if layer.GlowRenderer, err = NewGlowRenderer(192, 128, 6, 0.3, 1.0); err != nil {
 		return
 	}
 	if layer.Starmap, err = LoadMap("assets/starmap.tmx"); err != nil {
@@ -74,7 +74,7 @@ func (l *GameLayer) Render() {
 	l.GlowRenderer.DisableOutput()
 	for _, p := range l.Sim.Planets {
 		pos = p.Pos()
-		l.TileRenderer.Draw(p.Frame(), pos.X, pos.Y, 0, false, false)
+		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
 	}
 	l.GlowRenderer.EnableOutput()
 	l.TileRenderer.Unbind()
@@ -99,7 +99,7 @@ func (l *GameLayer) Render() {
 	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, 0, false, false)
 	for _, p := range l.Sim.Planets {
 		pos = p.Pos()
-		l.TileRenderer.Draw(p.Frame(), pos.X, pos.Y, 0, false, false)
+		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
 	}
 	l.TileRenderer.Unbind()
 

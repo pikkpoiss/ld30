@@ -76,18 +76,21 @@ func (l *HudLayer) Render() {
 			textCache = twodee.NewTextCache(l.regularFont)
 			l.cache[p] = textCache
 		}
+		pos := planet.Pos()
 		textCache.SetText(strconv.Itoa(planet.GetPopulation()))
 		texture = textCache.Texture
 		if texture != nil {
-			pt := l.game.WorldToScreenCoords(planet.Pos())
-			l.text.Draw(texture, pt.X+24, pt.Y-72)
+			adjust := twodee.Pt(planet.Radius + 0.1, -planet.Radius - 1.75)
+			pt := l.game.WorldToScreenCoords(pos.Add(adjust))
+			l.text.Draw(texture, pt.X, pt.Y)
 		}
 		//Display Individual Planet Temperatures
 		textCache.SetText(strconv.Itoa(int(planet.GetTemperature())) + "°F")
 		texture = textCache.Texture
 		if texture != nil {
-			pt := l.game.WorldToScreenCoords(planet.Pos())
-			l.text.Draw(texture, pt.X, pt.Y+48)
+			adjust := twodee.Pt(planet.Radius + 0.1, planet.Radius)
+			pt := l.game.WorldToScreenCoords(pos.Add(adjust))
+			l.text.Draw(texture, pt.X, pt.Y)
 		}
 	}
 

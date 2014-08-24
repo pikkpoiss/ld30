@@ -36,13 +36,18 @@ type PlanetaryBody struct {
 	Temperature          int32
 	State                PlanetaryState
 	Radius               float32
+	Scale                float32
 }
 
 func NewSun() *PlanetaryBody {
+	var (
+		scale  float32 = 1.0
+		length float32 = 128.0 / PxPerUnit * scale
+	)
 	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			0, 0,
-			128.0/PxPerUnit, 128.0/PxPerUnit,
+			length, length,
 			0,
 			twodee.Step10Hz,
 			[]int{0},
@@ -52,17 +57,22 @@ func NewSun() *PlanetaryBody {
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
 		Temperature:          27000000,
-		Radius:               0.5,
+		Radius:               length / 2.0,
+		Scale:                scale,
 	}
 	body.SetState(Sun)
 	return body
 }
 
 func NewPlanet(x, y float32) *PlanetaryBody {
+	var (
+		scale  float32 = float32(math.Min(0.9, math.Max(0.3, rand.Float64())))
+		length float32 = 128.0 / PxPerUnit * scale
+	)
 	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			x, y,
-			128.0/PxPerUnit, 128.0/PxPerUnit,
+			length, length,
 			0,
 			twodee.Step10Hz,
 			[]int{0},
@@ -73,7 +83,8 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0001,
 		Temperature:          72,
-		Radius:               0.5,
+		Radius:               length / 2.0,
+		Scale:                scale,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -194,5 +205,5 @@ func (p *PlanetaryBody) GetTemperature() int32 {
 }
 
 func (p *PlanetaryBody) CollidesWith(other *PlanetaryBody) bool {
-	return p.Pos().DistanceTo(other.Pos()) < p.Radius+other.Radius
+	return p.Pos().DistanceTo(other.Pos()) < (p.Radius+other.Radius)*0.8
 }
