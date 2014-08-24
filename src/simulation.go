@@ -48,6 +48,11 @@ func (s *Simulation) Update(elapsed time.Duration) {
 	s.SetPopulation(popSum)
 }
 
+func (s *Simulation) CheckCollision(index int) {
+	for j := index + 1; j < len(s.Planets); j++ {
+	}
+}
+
 func (s *Simulation) NBodyUpdate(elapsed time.Duration) {
 	var dist float64
 	for _, p := range s.Planets {

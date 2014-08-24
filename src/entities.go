@@ -3,7 +3,7 @@ package main
 import (
 	"math"
 	"time"
-
+"math/rand"
 	twodee "../libs/twodee"
 )
 
@@ -40,12 +40,12 @@ func NewSun() *PlanetaryBody {
 	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			0, 0,
-			32.0/PxPerUnit, 32.0/PxPerUnit,
+			128.0/PxPerUnit, 128.0/PxPerUnit,
 			0,
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Mass:                 1000.0,
+		Mass:                 35000.0,
 		Population:           0.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
@@ -59,13 +59,12 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			x, y,
-			32.0/PxPerUnit, 32.0/PxPerUnit,
+			128.0/PxPerUnit, 128.0/PxPerUnit,
 			0,
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Velocity: twodee.Pt(0, 0),
-		//		Velocity:             twodee.Pt(rand.Float32(), rand.Float32()),
+		Velocity:             twodee.Pt(rand.Float32() / 100.0, rand.Float32() / 100.0),
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
