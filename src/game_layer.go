@@ -8,6 +8,8 @@ import (
 
 const (
 	magicVelocityScalingFactor = 1e-3
+	// Starting time is 5minutes.
+	startDur = time.Duration(5) * time.Minute
 )
 
 type GameLayer struct {
@@ -22,6 +24,7 @@ type GameLayer struct {
 	MouseY                float32
 	DropPlanetListener    int
 	ReleasePlanetListener int
+	DurLeft               time.Duration
 	phantomPlanet         *PlanetaryBody
 	count                 int64
 }
@@ -32,6 +35,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 		App:           app,
 		Bounds:        bounds,
 		Sim:           NewSimulation(bounds, app.GameEventHandler),
+		DurLeft:       startDur,
 		phantomPlanet: nil,
 		count:         0,
 	}
@@ -131,6 +135,13 @@ func (l *GameLayer) Render() {
 
 func (l *GameLayer) Update(elapsed time.Duration) {
 	l.Sim.Update(elapsed)
+	l.DurLeft -= elapsed
+	if l.DurLeft <= 0 {
+		l.DurLeft = time.Duration(0)
+		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(ShowSplash))
+		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PauseMusic))
+		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayGameOverEffect))
+	}
 }
 
 func (l *GameLayer) Reset() (err error) {

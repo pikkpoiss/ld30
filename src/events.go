@@ -9,6 +9,9 @@ const (
 	PlayBackgroundMusic
 	DropPlanet
 	ReleasePlanet
+	ShowSplash
+	PauseMusic
+	PlayGameOverEffect
 	sentinel
 )
 

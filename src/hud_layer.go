@@ -1,10 +1,11 @@
 package main
 
 import (
-	twodee "../libs/twodee"
 	"fmt"
 	"image/color"
 	"time"
+
+	twodee "../libs/twodee"
 )
 
 type HudLayer struct {
@@ -12,6 +13,7 @@ type HudLayer struct {
 	regularFont *twodee.FontFace
 	planetFont  *twodee.FontFace
 	globalText  *twodee.TextCache
+	timeText    *twodee.TextCache
 	tempText    map[int]*twodee.TextCache
 	popText     map[int]*twodee.TextCache
 	bounds      twodee.Rectangle
@@ -38,6 +40,7 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 		tempText:    map[int]*twodee.TextCache{},
 		popText:     map[int]*twodee.TextCache{},
 		globalText:  twodee.NewTextCache(regularFont),
+		timeText:    twodee.NewTextCache(regularFont),
 		App:         app,
 		bounds:      twodee.Rect(0, 0, 1024, 768),
 		game:        game,
@@ -57,6 +60,7 @@ func (l *HudLayer) Delete() {
 		v.Delete()
 	}
 	l.globalText.Delete()
+	l.timeText.Delete()
 }
 
 func (l *HudLayer) Render() {
@@ -67,7 +71,9 @@ func (l *HudLayer) Render() {
 		adjust        twodee.Point
 		ok            bool
 		text          string
-		y             = l.bounds.Max.Y
+		x, y          float32
+		maxX          = l.bounds.Max.X
+		maxY          = l.bounds.Max.Y
 		aggPopulation = l.game.Sim.GetPopulation()
 		maxPopulation = l.game.Sim.GetMaxPopulation()
 	)
@@ -77,8 +83,25 @@ func (l *HudLayer) Render() {
 	text = fmt.Sprintf("POPULATION: %d     RECORD: %d", aggPopulation, maxPopulation)
 	l.globalText.SetText(text)
 	if l.globalText.Texture != nil {
-		y = y - float32(l.globalText.Texture.Height)
-		l.text.Draw(l.globalText.Texture, 0, y)
+		y = maxY - float32(l.globalText.Texture.Height)
+		l.text.Draw(l.globalText.Texture, 5, y)
+	}
+
+	// Display time remaining.
+	s := int64(l.game.DurLeft.Seconds())
+	m := s / 60
+	s = s % 60
+	if m > 0 {
+		text = fmt.Sprintf("%d:%02d", m, s)
+	} else {
+		text = fmt.Sprintf("%02d", s)
+	}
+	l.timeText.SetText(text)
+	if l.timeText.Texture != nil {
+		y = maxY - float32(l.timeText.Texture.Height)
+		// Some fudged padding to make sure there's room for the clock.
+		x = maxX - 60.0
+		l.text.Draw(l.timeText.Texture, x, y)
 	}
 
 	//Display Individual Planet Population Counts
