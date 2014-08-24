@@ -77,7 +77,7 @@ func (l *HudLayer) Render() {
 		texture = textCache.Texture
 		if texture != nil {
 			pt := l.game.WorldToScreenCoords(planet.Pos())
-			l.text.Draw(texture, pt.X, pt.Y)
+			l.text.Draw(texture, pt.X+24, pt.Y-72)
 		}
 	}
 
