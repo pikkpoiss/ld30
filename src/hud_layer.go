@@ -91,7 +91,12 @@ func (l *HudLayer) Render() {
 	s := int64(l.game.DurLeft.Seconds())
 	m := s / 60
 	s = s % 60
-	l.timeText.SetText(fmt.Sprintf("%d:%2d", m, s))
+	if m > 0 {
+		text = fmt.Sprintf("%d:%02d", m, s)
+	} else {
+		text = fmt.Sprintf("%02d", s)
+	}
+	l.timeText.SetText(text)
 	if l.timeText.Texture != nil {
 		y = maxY - float32(l.timeText.Texture.Height)
 		// Some fudged padding to make sure there's room for the clock.
