@@ -30,3 +30,5 @@ _testmain.go
 
 # Build output
 build/*
+
+tags
