@@ -51,7 +51,9 @@ func (l *HudLayer) Render() {
 		texture       *twodee.Texture
 		ok            bool
 		text          string
-		y             = l.bounds.Max.Y
+		x, y          float32
+		maxX          = l.bounds.Max.X
+		maxY          = l.bounds.Max.Y
 		aggPopulation = l.game.Sim.GetPopulation()
 		maxPopulation = l.game.Sim.GetMaxPopulation()
 	)
@@ -66,8 +68,22 @@ func (l *HudLayer) Render() {
 	textCache.SetText(text)
 	texture = textCache.Texture
 	if texture != nil {
-		y = y - float32(texture.Height)
-		l.text.Draw(texture, 0, y)
+		y = maxY - float32(texture.Height)
+		l.text.Draw(texture, 5, y)
+	}
+
+	// Display time remaining.
+	s := int64(l.game.DurLeft.Seconds())
+	m := s / 60
+	s = s % 60
+	text = fmt.Sprintf("%d:%2d", m, s)
+	textCache.SetText(text)
+	texture = textCache.Texture
+	if texture != nil {
+		y = maxY - float32(texture.Height)
+		// Some fudged padding to make sure there's room for the clock.
+		x = maxX - 60.0
+		l.text.Draw(texture, x, y)
 	}
 
 	//Display Individual Planet Population Counts
@@ -80,7 +96,7 @@ func (l *HudLayer) Render() {
 		textCache.SetText(strconv.Itoa(planet.GetPopulation()))
 		texture = textCache.Texture
 		if texture != nil {
-			adjust := twodee.Pt(planet.Radius + 0.1, -planet.Radius - 1.75)
+			adjust := twodee.Pt(planet.Radius+0.1, -planet.Radius-1.75)
 			pt := l.game.WorldToScreenCoords(pos.Add(adjust))
 			l.text.Draw(texture, pt.X, pt.Y)
 		}
@@ -88,7 +104,7 @@ func (l *HudLayer) Render() {
 		textCache.SetText(strconv.Itoa(int(planet.GetTemperature())) + "°F")
 		texture = textCache.Texture
 		if texture != nil {
-			adjust := twodee.Pt(planet.Radius + 0.1, planet.Radius)
+			adjust := twodee.Pt(planet.Radius+0.1, planet.Radius)
 			pt := l.game.WorldToScreenCoords(pos.Add(adjust))
 			l.text.Draw(texture, pt.X, pt.Y)
 		}
