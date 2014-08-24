@@ -126,3 +126,8 @@ func (l *GameLayer) OnDropPlanet(evt twodee.GETyper) {
 		l.Sim.AddPlanet(event.X, event.Y)
 	}
 }
+
+func (l *GameLayer) WorldToScreenCoords(pt twodee.Point) twodee.Point {
+	x, y := l.TileRenderer.WorldToScreenCoords(pt.X, pt.Y)
+	return twodee.Pt(x, y)
+}
