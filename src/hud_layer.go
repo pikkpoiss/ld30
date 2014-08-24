@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"strconv"
 	"time"
 
 	twodee "../libs/twodee"
@@ -17,25 +18,20 @@ type HudLayer struct {
 	game        *GameLayer
 }
 
-const (
-	HudHeight = 1200
-	HudWidth  = 1200
-)
-
 func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error) {
 	var (
 		regularFont *twodee.FontFace
 		background  = color.Transparent
 		font        = "assets/fonts/Roboto-Black.ttf"
 	)
-	if regularFont, err = twodee.NewFontFace(font, 32, color.RGBA{255, 255, 255, 255}, background); err != nil {
+	if regularFont, err = twodee.NewFontFace(font, 12, color.RGBA{255, 255, 255, 255}, background); err != nil {
 		return
 	}
 	layer = &HudLayer{
 		regularFont: regularFont,
 		cache:       map[int]*twodee.TextCache{},
 		App:         app,
-		bounds:      twodee.Rect(0, 0, HudWidth, HudHeight),
+		bounds:      twodee.Rect(0, 0, 1024, 768),
 		game:        game,
 	}
 	err = layer.Reset()
@@ -58,6 +54,8 @@ func (l *HudLayer) Render() {
 		aggregatePopulation = l.game.Sim.GetPopulation()
 	)
 	l.text.Bind()
+
+	// Display Aggregate Population Count
 	if textCache, ok = l.cache[1]; !ok {
 		textCache = twodee.NewTextCache(l.regularFont)
 		l.cache[1] = textCache
@@ -68,6 +66,23 @@ func (l *HudLayer) Render() {
 		y = y - float32(texture.Height)
 		l.text.Draw(texture, 0, y)
 	}
+
+	//Display Individual Planet Population Counts
+	for p, planet := range l.game.Sim.Planets {
+		if textCache, ok = l.cache[p]; !ok {
+			textCache = twodee.NewTextCache(l.regularFont)
+			l.cache[p] = textCache
+		}
+		textCache.SetText(strconv.Itoa(planet.GetPopulation()))
+		texture = textCache.Texture
+		if texture != nil {
+			pos := planet.Pos()
+			x, y := l.game.TileRenderer.WorldToScreenCoords(pos.X, pos.Y)
+			fmt.Printf("X %v Y %v\n", x, y)
+			l.text.Draw(texture, x, y)
+		}
+	}
+
 	l.text.Unbind()
 }
 
