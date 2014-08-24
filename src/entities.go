@@ -177,6 +177,10 @@ func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	p.MoveTo(twodee.Pt(pos.X+dist.X, pos.Y+dist.Y))
 }
 
+func (p *PlanetaryBody) HasState(state PlanetaryState) bool {
+	return p.State & state == state
+}
+
 func (p *PlanetaryBody) RemState(state PlanetaryState) {
 	p.SetState(p.State & ^state)
 }
