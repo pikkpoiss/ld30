@@ -16,6 +16,7 @@ const (
 	TooClose
 	TooFar
 	Exploding
+	Phantom
 )
 
 var PlanetaryAnimations = map[PlanetaryState][]int{
@@ -23,6 +24,7 @@ var PlanetaryAnimations = map[PlanetaryState][]int{
 	Fertile:  []int{4},
 	TooClose: []int{8},
 	TooFar:   []int{12},
+	Phantom:  []int{16},
 }
 
 type PlanetaryBody struct {

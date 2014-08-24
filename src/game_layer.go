@@ -108,6 +108,11 @@ func (l *GameLayer) Render() {
 		pos = p.Pos()
 		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
 	}
+	if l.phantomPlanet != nil {
+		p := l.phantomPlanet
+		pos = p.Pos()
+		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
+	}
 	l.TileRenderer.Unbind()
 
 	l.GlowRenderer.Draw()
@@ -153,6 +158,7 @@ func (l *GameLayer) OnDropPlanet(evt twodee.GETyper) {
 	switch event := evt.(type) {
 	case *DropPlanetEvent:
 		l.phantomPlanet = NewPlanet(event.X, event.Y)
+		l.phantomPlanet.SetState(Phantom)
 	}
 }
 
@@ -171,6 +177,7 @@ func (l *GameLayer) OnReleasePlanet(evt twodee.GETyper) {
 			// planet doesn't go careening off screen immediately.
 			relVector = relVector.Scale(event.Mag)
 			l.phantomPlanet.Velocity = relVector
+			l.phantomPlanet.RemState(Phantom)
 			l.Sim.AddPlanet(l.phantomPlanet)
 			l.phantomPlanet = nil
 		}

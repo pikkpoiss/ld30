@@ -51,7 +51,7 @@ func (s *Simulation) Update(elapsed time.Duration) {
 		p.Update(elapsed)
 		dist = p.Pos().DistanceTo(s.Sun.Pos())
 		switch {
-		case dist < 10:
+		case dist < 7:
 			p.SetState(TooClose)
 		case dist > 20:
 			p.SetState(TooFar)
