@@ -39,6 +39,7 @@ type PlanetaryBody struct {
 	State                PlanetaryState
 	Radius               float32
 	Scale                float32
+	DistToSun            float64
 }
 
 func NewSun() *PlanetaryBody {
@@ -54,7 +55,7 @@ func NewSun() *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Mass:                 35000.0,
+		Mass:                 50000.0 * scale * scale,
 		Population:           0.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
@@ -68,7 +69,7 @@ func NewSun() *PlanetaryBody {
 
 func NewPlanet(x, y float32) *PlanetaryBody {
 	var (
-		scale  float32 = float32(math.Min(0.9, math.Max(0.3, rand.Float64())))
+		scale  float32 = float32(math.Min(0.6, math.Max(0.2, rand.Float64())))
 		length float32 = 128.0 / PxPerUnit * scale
 	)
 	body := &PlanetaryBody{
@@ -80,13 +81,14 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 			[]int{0},
 		),
 		Velocity:             twodee.Pt(0, 0),
-		Mass:                 2000.0,
+		Mass:                 5000.0 * scale * scale,
 		Population:           100.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0001,
 		Temperature:          72,
 		Radius:               length / 2.0,
 		Scale:                scale,
+		DistToSun:            0.0,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -158,13 +160,12 @@ func (p *PlanetaryBody) UpdatePopulation(elapsed time.Duration) {
 }
 
 func (p *PlanetaryBody) UpdateTemperature(elapsed time.Duration) {
-	if p.State == TooFar {
-		p.Temperature += (-400 - p.Temperature) / int32(elapsed/time.Millisecond)
-	} else if p.State == TooClose {
-		p.Temperature += ((5000 - p.Temperature) / int32(elapsed/time.Millisecond)) / 10
-	} else if p.State == Fertile {
-		p.Temperature += (72 - p.Temperature) / int32(elapsed/time.Millisecond)
+	if p.State == TooClose {
+		p.Temperature = int32(90000.0 / math.Pow(p.DistToSun, 2.0))
+	} else {
+		p.Temperature = int32(5000.0 / math.Pow(p.DistToSun, 1.4))
 	}
+
 }
 
 func (p *PlanetaryBody) Update(elapsed time.Duration) {
@@ -175,6 +176,10 @@ func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	ms := float32(elapsed.Seconds() * 1e3)
 	dist := p.Velocity.Scale(ms)
 	p.MoveTo(twodee.Pt(pos.X+dist.X, pos.Y+dist.Y))
+}
+
+func (p *PlanetaryBody) HasState(state PlanetaryState) bool {
+	return p.State & state == state
 }
 
 func (p *PlanetaryBody) RemState(state PlanetaryState) {
@@ -208,4 +213,8 @@ func (p *PlanetaryBody) GetTemperature() int32 {
 
 func (p *PlanetaryBody) CollidesWith(other *PlanetaryBody) bool {
 	return p.Pos().DistanceTo(other.Pos()) < (p.Radius+other.Radius)*0.8
+}
+
+func (p *PlanetaryBody) SetDistToSun(dist float64) {
+	p.DistToSun = dist
 }
