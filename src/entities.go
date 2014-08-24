@@ -1,10 +1,10 @@
 package main
 
 import (
-	"math"
-	"time"
-
 	twodee "../libs/twodee"
+	"math"
+	"math/rand"
+	"time"
 )
 
 type PlanetaryState int32
@@ -15,6 +15,7 @@ const (
 	Fertile
 	TooClose
 	TooFar
+	Exploding
 )
 
 var PlanetaryAnimations = map[PlanetaryState][]int{
@@ -34,22 +35,24 @@ type PlanetaryBody struct {
 	PopulationGrowthRate float32
 	Temperature          int32
 	State                PlanetaryState
+	Radius               float32
 }
 
 func NewSun() *PlanetaryBody {
 	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			0, 0,
-			32.0/PxPerUnit, 32.0/PxPerUnit,
+			128.0/PxPerUnit, 128.0/PxPerUnit,
 			0,
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Mass:                 1000.0,
+		Mass:                 35000.0,
 		Population:           0.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
 		Temperature:          27000000,
+		Radius:               0.5,
 	}
 	body.SetState(Sun)
 	return body
@@ -59,18 +62,18 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 	body := &PlanetaryBody{
 		AnimatingEntity: twodee.NewAnimatingEntity(
 			x, y,
-			32.0/PxPerUnit, 32.0/PxPerUnit,
+			128.0/PxPerUnit, 128.0/PxPerUnit,
 			0,
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Velocity: twodee.Pt(0, 0),
-		//		Velocity:             twodee.Pt(rand.Float32(), rand.Float32()),
+		Velocity:             twodee.Pt(rand.Float32()/100.0, rand.Float32()/100.0),
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0001,
 		Temperature:          72,
+		Radius:               0.5,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -145,7 +148,7 @@ func (p *PlanetaryBody) UpdateTemperature(elapsed time.Duration) {
 	if p.State == TooFar {
 		p.Temperature += (-400 - p.Temperature) / int32(elapsed/time.Millisecond)
 	} else if p.State == TooClose {
-		p.Temperature += (5000 - p.Temperature) / int32(elapsed/time.Millisecond)
+		p.Temperature += ((5000 - p.Temperature) / int32(elapsed/time.Millisecond)) / 10
 	} else if p.State == Fertile {
 		p.Temperature += (72 - p.Temperature) / int32(elapsed/time.Millisecond)
 	}
@@ -188,4 +191,8 @@ func (p *PlanetaryBody) GetPopulation() int {
 
 func (p *PlanetaryBody) GetTemperature() int32 {
 	return int32(p.Temperature)
+}
+
+func (p *PlanetaryBody) CollidesWith(other *PlanetaryBody) bool {
+	return p.Pos().DistanceTo(other.Pos()) < p.Radius+other.Radius
 }

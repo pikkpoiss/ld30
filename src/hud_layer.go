@@ -47,11 +47,13 @@ func (l *HudLayer) Delete() {
 
 func (l *HudLayer) Render() {
 	var (
-		textCache           *twodee.TextCache
-		texture             *twodee.Texture
-		ok                  bool
-		y                   = l.bounds.Max.Y
-		aggregatePopulation = l.game.Sim.GetPopulation()
+		textCache     *twodee.TextCache
+		texture       *twodee.Texture
+		ok            bool
+		text          string
+		y             = l.bounds.Max.Y
+		aggPopulation = l.game.Sim.GetPopulation()
+		maxPopulation = l.game.Sim.GetMaxPopulation()
 	)
 	l.text.Bind()
 
@@ -60,7 +62,8 @@ func (l *HudLayer) Render() {
 		textCache = twodee.NewTextCache(l.regularFont)
 		l.cache[1] = textCache
 	}
-	textCache.SetText(fmt.Sprintf("POPULATION: %d", aggregatePopulation))
+	text = fmt.Sprintf("POPULATION: %d     RECORD: %d", aggPopulation, maxPopulation)
+	textCache.SetText(text)
 	texture = textCache.Texture
 	if texture != nil {
 		y = y - float32(texture.Height)

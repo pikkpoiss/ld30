@@ -22,10 +22,11 @@ type GameLayer struct {
 }
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
+	var bounds = twodee.Rect(-28, -21, 28, 21)
 	layer = &GameLayer{
 		App:           app,
-		Bounds:        twodee.Rect(-28, -21, 28, 21),
-		Sim:           NewSimulation(),
+		Bounds:        bounds,
+		Sim:           NewSimulation(bounds, app.GameEventHandler),
 		phantomPlanet: nil,
 	}
 	if layer.BatchRenderer, err = twodee.NewBatchRenderer(layer.Bounds, app.WinBounds); err != nil {
