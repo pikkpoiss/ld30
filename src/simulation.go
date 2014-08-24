@@ -27,12 +27,15 @@ func NewSimulation() *Simulation {
 }
 
 func (s *Simulation) Update(elapsed time.Duration) {
+	var (
+		dist   float32
+		popSum = 0
+	)
 	s.NBodyUpdate(elapsed)
-	var popSum = 0
 	for _, p := range s.Planets {
 		popSum += p.GetPopulation()
 		p.Update(elapsed)
-		dist = float64(p.Pos().DistanceTo(s.Sun.Pos()))
+		dist = p.Pos().DistanceTo(s.Sun.Pos())
 		switch {
 		case dist < 10:
 			p.SetState(TooClose)
