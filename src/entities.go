@@ -160,14 +160,11 @@ func (p *PlanetaryBody) UpdatePopulation(elapsed time.Duration) {
 }
 
 func (p *PlanetaryBody) UpdateTemperature(elapsed time.Duration) {
-	/*if p.State == TooFar {
-		p.Temperature += (-400 - p.Temperature) / int32(elapsed/time.Millisecond)
-	} else if p.State == TooClose {
-		p.Temperature += ((5000 - p.Temperature) / int32(elapsed/time.Millisecond)) / 10
-	} else if p.State == Fertile {
-		p.Temperature += (72 - p.Temperature) / int32(elapsed/time.Millisecond)
-	}*/
-	p.Temperature = int32(1000.0 / p.DistToSun)
+	if p.State == TooClose {
+		p.Temperature = int32(90000.0 / math.Pow(p.DistToSun, 2.0))
+	} else {
+		p.Temperature = int32(5000.0 / math.Pow(p.DistToSun, 1.4))
+	}
 
 }
 
