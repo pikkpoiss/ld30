@@ -161,7 +161,16 @@ func (l *GameLayer) OnReleasePlanet(evt twodee.GETyper) {
 	case *ReleasePlanetEvent:
 		// do something.
 		if l.phantomPlanet != nil {
-			l.phantomPlanet.Velocity = event.P.Scale(event.Mag)
+			p := l.phantomPlanet.Pos()
+			relVector := twodee.Pt(event.P.X-p.X, event.P.Y-p.Y)
+			// TODO: I'm not really sure we actually need to scale
+			// the relative vector by a magnitude, since we get
+			// that for free by virtue of the relativeness of the
+			// vector to some point p0.
+			// Still, we need to reduce it by some amount so the
+			// planet doesn't go careening off screen immediately.
+			relVector = relVector.Scale(event.Mag)
+			l.phantomPlanet.Velocity = relVector
 			l.Sim.AddPlanet(l.phantomPlanet)
 			l.phantomPlanet = nil
 		}

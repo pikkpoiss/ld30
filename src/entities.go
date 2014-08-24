@@ -1,10 +1,10 @@
 package main
 
 import (
-	twodee "../libs/twodee"
 	"math"
-	"math/rand"
 	"time"
+
+	twodee "../libs/twodee"
 )
 
 type PlanetaryState int32
@@ -67,7 +67,7 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Velocity:             twodee.Pt(rand.Float32()/100.0, rand.Float32()/100.0),
+		Velocity:             twodee.Pt(0, 0),
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
