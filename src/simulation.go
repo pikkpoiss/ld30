@@ -50,6 +50,7 @@ func (s *Simulation) Update(elapsed time.Duration) {
 		popSum += p.GetPopulation()
 		p.Update(elapsed)
 		dist = p.Pos().DistanceTo(s.Sun.Pos())
+		p.SetDistToSun(float64(dist))
 		switch {
 		case dist < 7:
 			p.SetState(TooClose)
