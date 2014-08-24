@@ -1,10 +1,10 @@
 package main
 
 import (
-	"math"
-	"time"
-"math/rand"
 	twodee "../libs/twodee"
+	"math"
+	"math/rand"
+	"time"
 )
 
 type PlanetaryState int32
@@ -15,6 +15,7 @@ const (
 	Fertile
 	TooClose
 	TooFar
+	Exploding
 )
 
 var PlanetaryAnimations = map[PlanetaryState][]int{
@@ -34,6 +35,7 @@ type PlanetaryBody struct {
 	PopulationGrowthRate float32
 	Temperature          int32
 	State                PlanetaryState
+	Radius               float32
 }
 
 func NewSun() *PlanetaryBody {
@@ -50,6 +52,7 @@ func NewSun() *PlanetaryBody {
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
 		Temperature:          27000000,
+		Radius:               0.5,
 	}
 	body.SetState(Sun)
 	return body
@@ -64,12 +67,13 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Velocity:             twodee.Pt(rand.Float32() / 100.0, rand.Float32() / 100.0),
+		Velocity:             twodee.Pt(rand.Float32()/100.0, rand.Float32()/100.0),
 		Mass:                 2000.0,
 		Population:           100.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0001,
 		Temperature:          72,
+		Radius:               0.5,
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -187,4 +191,8 @@ func (p *PlanetaryBody) GetPopulation() int {
 
 func (p *PlanetaryBody) GetTemperature() int32 {
 	return int32(p.Temperature)
+}
+
+func (p *PlanetaryBody) CollidesWith(other *PlanetaryBody) bool {
+	return p.Pos().DistanceTo(other.Pos()) < p.Radius+other.Radius
 }

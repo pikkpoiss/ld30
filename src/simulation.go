@@ -1,7 +1,9 @@
 package main
 
 import (
+	twodee "../libs/twodee"
 	"math"
+	"sort"
 	"time"
 )
 
@@ -9,20 +11,30 @@ const (
 	// 6.67e-11 m^3kg^-1s^-2
 	GravitationalConst = 6.67e-11
 	// Play GC in m^3kg^-1ms^-2
-	GravConst = 5e-8
+	GravConst    = 5e-8
+	BoundsBuffer = 10.0
 )
 
 type Simulation struct {
 	Sun                 *PlanetaryBody
 	Planets             []*PlanetaryBody
 	AggregatePopulation int
+	Events              *twodee.GameEventHandler
+	Bounds              twodee.Rectangle
 }
 
-func NewSimulation() *Simulation {
+func NewSimulation(bounds twodee.Rectangle, events *twodee.GameEventHandler) *Simulation {
 	return &Simulation{
 		Sun:                 NewSun(),
 		Planets:             []*PlanetaryBody{},
 		AggregatePopulation: 0,
+		Events:              events,
+		Bounds: twodee.Rect(
+			bounds.Min.X-BoundsBuffer,
+			bounds.Min.Y-BoundsBuffer,
+			bounds.Max.X+BoundsBuffer,
+			bounds.Max.Y+BoundsBuffer,
+		),
 	}
 }
 
@@ -31,7 +43,7 @@ func (s *Simulation) Update(elapsed time.Duration) {
 		dist   float32
 		popSum = 0
 	)
-	s.NBodyUpdate(elapsed)
+	s.nBodyUpdate(elapsed)
 	for _, p := range s.Planets {
 		popSum += p.GetPopulation()
 		p.Update(elapsed)
@@ -39,21 +51,42 @@ func (s *Simulation) Update(elapsed time.Duration) {
 		switch {
 		case dist < 10:
 			p.SetState(TooClose)
-		case dist > 15:
+		case dist > 20:
 			p.SetState(TooFar)
 		default:
 			p.SetState(Fertile)
 		}
 	}
-	s.SetPopulation(popSum)
+	s.setPopulation(popSum)
+	s.doCollisions()
 }
 
-func (s *Simulation) CheckCollision(index int) {
-	for j := index + 1; j < len(s.Planets); j++ {
+func (s *Simulation) doCollisions() {
+	var toDestroy = sort.IntSlice{}
+	for index := 0; index < len(s.Planets); index++ {
+		for j := index + 1; j < len(s.Planets); j++ {
+			if s.Planets[index].CollidesWith(s.Planets[j]) {
+				toDestroy = append(toDestroy, index)
+				toDestroy = append(toDestroy, j)
+			}
+		}
+		if s.Planets[index].CollidesWith(s.Sun) {
+			toDestroy = append(toDestroy, index)
+		}
+		if !s.Bounds.ContainsPoint(s.Planets[index].Pos()) {
+			toDestroy = append(toDestroy, index)
+		}
+	}
+
+	if len(toDestroy) > 0 {
+		toDestroy.Sort()
+		for i := len(toDestroy) - 1; i >= 0; i-- {
+			s.destroyPlanet(toDestroy[i])
+		}
 	}
 }
 
-func (s *Simulation) NBodyUpdate(elapsed time.Duration) {
+func (s *Simulation) nBodyUpdate(elapsed time.Duration) {
 	var dist float64
 	for _, p := range s.Planets {
 		// First, we must handle the sun...
@@ -76,7 +109,13 @@ func (s *Simulation) AddPlanet(x, y float32) {
 	s.Planets = append(s.Planets, NewPlanet(x, y))
 }
 
-func (s *Simulation) SetPopulation(population int) {
+func (s *Simulation) destroyPlanet(index int) {
+	var p = s.Planets[index]
+	s.Planets = append(s.Planets[:index], s.Planets[index+1:]...)
+	p.SetState(Exploding)
+}
+
+func (s *Simulation) setPopulation(population int) {
 	s.AggregatePopulation = population
 }
 
