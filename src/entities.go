@@ -1,10 +1,10 @@
 package main
 
 import (
-	"math"
-	"time"
-
 	twodee "../libs/twodee"
+	"math"
+	"math/rand"
+	"time"
 )
 
 type PlanetaryState int32
