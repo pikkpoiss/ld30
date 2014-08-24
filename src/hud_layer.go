@@ -13,6 +13,7 @@ type HudLayer struct {
 	regularFont *twodee.FontFace
 	planetFont  *twodee.FontFace
 	globalText  *twodee.TextCache
+	timeText    *twodee.TextCache
 	tempText    map[int]*twodee.TextCache
 	popText     map[int]*twodee.TextCache
 	bounds      twodee.Rectangle
@@ -39,6 +40,7 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 		tempText:    map[int]*twodee.TextCache{},
 		popText:     map[int]*twodee.TextCache{},
 		globalText:  twodee.NewTextCache(regularFont),
+		timeText:    twodee.NewTextCache(regularFont),
 		App:         app,
 		bounds:      twodee.Rect(0, 0, 1024, 768),
 		game:        game,
@@ -58,6 +60,7 @@ func (l *HudLayer) Delete() {
 		v.Delete()
 	}
 	l.globalText.Delete()
+	l.timeText.Delete()
 }
 
 func (l *HudLayer) Render() {
@@ -88,14 +91,12 @@ func (l *HudLayer) Render() {
 	s := int64(l.game.DurLeft.Seconds())
 	m := s / 60
 	s = s % 60
-	text = fmt.Sprintf("%d:%2d", m, s)
-	textCache.SetText(text)
-	texture = textCache.Texture
-	if texture != nil {
-		y = maxY - float32(texture.Height)
+	l.timeText.SetText(fmt.Sprintf("%d:%2d", m, s))
+	if l.timeText.Texture != nil {
+		y = maxY - float32(l.timeText.Texture.Height)
 		// Some fudged padding to make sure there's room for the clock.
 		x = maxX - 60.0
-		l.text.Draw(texture, x, y)
+		l.text.Draw(l.timeText.Texture, x, y)
 	}
 
 	//Display Individual Planet Population Counts
