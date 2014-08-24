@@ -55,7 +55,7 @@ func NewSun() *PlanetaryBody {
 			twodee.Step10Hz,
 			[]int{0},
 		),
-		Mass:                 35000.0 * scale * scale,
+		Mass:                 50000.0 * scale * scale,
 		Population:           0.0,
 		MaxPopulation:        0.0,
 		PopulationGrowthRate: 0.0,
@@ -69,7 +69,7 @@ func NewSun() *PlanetaryBody {
 
 func NewPlanet(x, y float32) *PlanetaryBody {
 	var (
-		scale  float32 = float32(math.Min(0.9, math.Max(0.3, rand.Float64())))
+		scale  float32 = float32(math.Min(0.6, math.Max(0.2, rand.Float64())))
 		length float32 = 128.0 / PxPerUnit * scale
 	)
 	body := &PlanetaryBody{

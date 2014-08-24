@@ -54,7 +54,7 @@ func (s *Simulation) Update(elapsed time.Duration) {
 		switch {
 		case dist < 7:
 			p.SetState(TooClose)
-		case dist > 20:
+		case dist > 30:
 			p.SetState(TooFar)
 		default:
 			p.SetState(Fertile)

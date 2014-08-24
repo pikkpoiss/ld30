@@ -26,7 +26,7 @@ type GameLayer struct {
 }
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
-	var bounds = twodee.Rect(-32, -24, 32, 24)
+	var bounds = twodee.Rect(-48, -36, 48, 36)
 	layer = &GameLayer{
 		App:           app,
 		Bounds:        bounds,
@@ -86,7 +86,6 @@ func (l *GameLayer) Render() {
 		pos = p.Pos()
 		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
 	}
-	// TODO: Render l.phantomPlanet.
 	l.GlowRenderer.EnableOutput()
 	l.TileRenderer.Unbind()
 

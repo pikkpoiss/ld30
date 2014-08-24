@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" width="64" height="48" tilewidth="16" tileheight="16">
+<map version="1.0" orientation="orthogonal" width="96" height="72" tilewidth="16" tileheight="16">
  <tileset firstgid="1" name="starmap.fw" tilewidth="16" tileheight="16">
   <image source="starmap.fw.png" width="64" height="64"/>
  </tileset>
- <layer name="tiles" width="64" height="48">
+ <layer name="tiles" width="96" height="72">
   <data encoding="base64" compression="zlib">
-   eJzt2ckOhSAMQFGn//9mV24aIkIsne7ZuHkxdKAQ37YBfaf1ApRd1gsogjzHQa1i0KjTrvx+aeZ8GVnXMfF+oCX7XUiyOAc4e/yhJrXJuWfdD3v/JzBg3RerjMbZu4NWyRug4RJP4I9e8H7PoN/Xq/YNYBa9Cdjzug+9nK3W89xrfbzr5U2zvyrULEqM/L/3TZR6vmnFYD2/JfoRLRn2X8uquLLm7/F1bozkwdtsnLGy7pFmd4b9kCGGqG7Q9gCq
+   eJztnM1ywzAIhNM27//MHR8y8WhkS0jALpjv0lP1Ayxg2dHrheUH/P/SMTTmQ+K5/rfjXNb8oRegwKrvNfw4GkMzVqJrNDMSP0fWXKbch2DFftq63/GhVQ7S1MSv4lhPJqPWz/Hrsb+VuJasq2K9OIjcU4yw1ilLX83kQ4nNUXWiNy/7uqPUVOZ13unVSsvM9tgl894OWPJ7RN7N34y0dRe9V4Z4ZVhDRO6ex1bjCh2PH1jW0YKKVSt7SMcdnQGw+q3AUTGRk4x1+64HnYnj1TOB0ggnrV+kfsrgV4Y97J5XsucqBhtbkHVfI9jj7cDiHQDTe4URu7Hp5eMoGmJ8PxzFdl4w5KVdn5RPcyCtFT2/a+cc9ne6PRg0zQC692CJhzMz+mCKH8bvJJjso02dQdkTxa7I/p3RRqy/pznW5emrHTtIarJn/e7tSWt+S9946oTxeV4LdK+YCY84YfIXY63KgJddreaRxmjW/Dq7L+TvWNu5LZ/xWHLXk/JWJG0x+mVFD8g4Z7Th05BoLvOZWlYsfDYa0zNOItWMYh3v+65Y+r8CQ/m/eAoe95x5wtQToO1SPXsMZuLkqTVJS0OScTx0c8yBzg+FDC0NIrRcsYaFqS/JBPoblIxzZoRVf5r+tYyVq57IU3+fNWTURNRntTtfRPpWmTU/sHCl817cou++2b0DAEHF3xe2O9e0yXyWc+Ur7btYWrTrZ9R6fMXZtuhc423b6L5E5b8Zu0W07T+pQQI/
   </data>
  </layer>
 </map>
