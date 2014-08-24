@@ -41,7 +41,7 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 		backgroundMusic:  backgroundMusic,
 		planetDropEffect: planetDropEffect,
 	}
-	planetDropEffect.SetVolume(40)
+	planetDropEffect.SetVolume(60)
 	audioSystem.backgroundMusicObserverId = app.GameEventHandler.AddObserver(PlayBackgroundMusic, audioSystem.PlayBackgroundMusic)
 	audioSystem.planetDropEffectObserverId = app.GameEventHandler.AddObserver(PlayPlanetDropEffect, audioSystem.PlayPlanetDropEffect)
 	return
