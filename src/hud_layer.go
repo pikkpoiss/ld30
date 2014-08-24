@@ -10,6 +10,7 @@ import (
 type HudLayer struct {
 	text        *twodee.TextRenderer
 	regularFont *twodee.FontFace
+	planetFont  *twodee.FontFace
 	globalText  *twodee.TextCache
 	tempText    map[int]*twodee.TextCache
 	popText     map[int]*twodee.TextCache
@@ -21,14 +22,19 @@ type HudLayer struct {
 func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error) {
 	var (
 		regularFont *twodee.FontFace
+		planetFont  *twodee.FontFace
 		background  = color.Transparent
-		font        = "assets/fonts/Roboto-Black.ttf"
+		font        = "assets/fonts/Exo-SemiBold.ttf"
 	)
 	if regularFont, err = twodee.NewFontFace(font, 24, color.RGBA{255, 255, 255, 255}, background); err != nil {
 		return
 	}
+	if planetFont, err = twodee.NewFontFace(font, 18, color.RGBA{255, 255, 255, 255}, background); err != nil {
+		return
+	}
 	layer = &HudLayer{
 		regularFont: regularFont,
+		planetFont:  planetFont,
 		tempText:    map[int]*twodee.TextCache{},
 		popText:     map[int]*twodee.TextCache{},
 		globalText:  twodee.NewTextCache(regularFont),
@@ -79,10 +85,10 @@ func (l *HudLayer) Render() {
 	for p, planet := range l.game.Sim.Planets {
 		planetPos = planet.Pos()
 		if textCache, ok = l.popText[p]; !ok {
-			textCache = twodee.NewTextCache(l.regularFont)
+			textCache = twodee.NewTextCache(l.planetFont)
 			l.popText[p] = textCache
 		}
-		textCache.SetText(fmt.Sprintf("%d", planet.GetPopulation()))
+		textCache.SetText(fmt.Sprintf("%d PEOPLE", planet.GetPopulation()))
 		if textCache.Texture != nil {
 			adjust = twodee.Pt(planet.Radius+0.1, -planet.Radius-0.1)
 			screenPos = l.game.WorldToScreenCoords(planetPos.Add(adjust))
