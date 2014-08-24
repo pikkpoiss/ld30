@@ -19,6 +19,7 @@ type Simulation struct {
 	Sun                 *PlanetaryBody
 	Planets             []*PlanetaryBody
 	AggregatePopulation int
+	MaxPopulation       int
 	Events              *twodee.GameEventHandler
 	Bounds              twodee.Rectangle
 }
@@ -28,6 +29,7 @@ func NewSimulation(bounds twodee.Rectangle, events *twodee.GameEventHandler) *Si
 		Sun:                 NewSun(),
 		Planets:             []*PlanetaryBody{},
 		AggregatePopulation: 0,
+		MaxPopulation:       0,
 		Events:              events,
 		Bounds: twodee.Rect(
 			bounds.Min.X-BoundsBuffer,
@@ -117,8 +119,15 @@ func (s *Simulation) destroyPlanet(index int) {
 
 func (s *Simulation) setPopulation(population int) {
 	s.AggregatePopulation = population
+	if population > s.MaxPopulation {
+		s.MaxPopulation = population
+	}
 }
 
 func (s *Simulation) GetPopulation() int {
 	return s.AggregatePopulation
+}
+
+func (s *Simulation) GetMaxPopulation() int {
+	return s.MaxPopulation
 }
