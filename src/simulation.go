@@ -3,7 +3,6 @@ package main
 import (
 	twodee "../libs/twodee"
 	"math"
-	"sort"
 	"time"
 )
 
@@ -50,6 +49,9 @@ func (s *Simulation) Update(elapsed time.Duration) {
 	for _, p := range s.Planets {
 		popSum += p.GetPopulation()
 		p.Update(elapsed)
+		if p.HasState(Dying) || p.HasState(Dead) {
+			continue
+		}
 		dist = p.Pos().DistanceTo(s.Sun.Pos())
 		p.SetDistToSun(float64(dist))
 		switch {
@@ -63,29 +65,30 @@ func (s *Simulation) Update(elapsed time.Duration) {
 	}
 	s.setPopulation(popSum)
 	s.doCollisions()
+	s.doRemoveDeadPlanets()
 }
 
 func (s *Simulation) doCollisions() {
-	var toDestroy = sort.IntSlice{}
 	for index := 0; index < len(s.Planets); index++ {
 		for j := index + 1; j < len(s.Planets); j++ {
 			if s.Planets[index].CollidesWith(s.Planets[j]) {
-				toDestroy = append(toDestroy, index)
-				toDestroy = append(toDestroy, j)
+				s.destroyPlanet(index, Colliding)
+				s.destroyPlanet(j, Colliding)
 			}
 		}
 		if s.Planets[index].CollidesWith(s.Sun) {
-			toDestroy = append(toDestroy, index)
+			s.destroyPlanet(index, Exploding)
 		}
 		if !s.Bounds.ContainsPoint(s.Planets[index].Pos()) {
-			toDestroy = append(toDestroy, index)
+			s.Planets[index].SetState(Dead)
 		}
 	}
+}
 
-	if len(toDestroy) > 0 {
-		toDestroy.Sort()
-		for i := len(toDestroy) - 1; i >= 0; i-- {
-			s.destroyPlanet(toDestroy[i])
+func (s *Simulation) doRemoveDeadPlanets() {
+	for i := len(s.Planets) - 1; i >= 0; i-- {
+		if s.Planets[i].HasState(Dead) {
+			s.removePlanet(i)
 		}
 	}
 }
@@ -93,6 +96,9 @@ func (s *Simulation) doCollisions() {
 func (s *Simulation) nBodyUpdate(elapsed time.Duration) {
 	var dist float64
 	for _, p := range s.Planets {
+		if p.HasState(Dying) || p.HasState(Dead) {
+			continue
+		}
 		// First, we must handle the sun...
 		dist = float64(s.Sun.Pos().DistanceTo(p.Pos()))
 		var force = s.Sun.Pos().Sub(p.Pos()).Scale(s.Sun.Mass * p.Mass).Scale(float32(math.Pow(dist, -3)))
@@ -113,10 +119,12 @@ func (s *Simulation) AddPlanet(p *PlanetaryBody) {
 	s.Planets = append(s.Planets, p)
 }
 
-func (s *Simulation) destroyPlanet(index int) {
-	var p = s.Planets[index]
+func (s *Simulation) removePlanet(index int) {
 	s.Planets = append(s.Planets[:index], s.Planets[index+1:]...)
-	p.SetState(Exploding)
+}
+
+func (s *Simulation) destroyPlanet(index int, state PlanetaryState) {
+	s.Planets[index].Destroy(state)
 }
 
 func (s *Simulation) setPopulation(population int) {

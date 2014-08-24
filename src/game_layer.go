@@ -43,7 +43,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 		return
 	}
 	tilem := twodee.TileMetadata{
-		Path:          "assets/tiles.fw.png",
+		Path:          "assets/tiles.png",
 		PxPerUnit:     int(PxPerUnit),
 		TileWidth:     128,
 		TileHeight:    128,
@@ -91,6 +91,8 @@ func (l *GameLayer) Render() {
 	l.GlowRenderer.Bind()
 	l.GlowRenderer.SetStrength(float32(0.3 + glow))
 
+	/*
+	// Enable planets to block out aura.
 	l.TileRenderer.Bind()
 	l.GlowRenderer.DisableOutput()
 	for _, p := range l.Sim.Planets {
@@ -99,12 +101,22 @@ func (l *GameLayer) Render() {
 	}
 	l.GlowRenderer.EnableOutput()
 	l.TileRenderer.Unbind()
+	*/
 
 	l.BatchRenderer.Bind()
 	l.BatchRenderer.Draw(l.Starmap, l.Bounds.Min.X, l.Bounds.Min.Y, 0)
 	l.BatchRenderer.Unbind()
 
 	l.TileRenderer.Bind()
+	// Draw an aura around planets.
+	for _, p := range l.Sim.Planets {
+		pos = p.Pos()
+		frame := 33
+		if p.HasState(Dying) {
+			frame = p.Frame()
+		}
+		l.TileRenderer.DrawScaled(frame, pos.X, pos.Y, 0, p.Scale, false, false)
+	}
 	pos = l.Sim.Sun.Pos()
 	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, float32(radians), false, false)
 
@@ -120,7 +132,7 @@ func (l *GameLayer) Render() {
 	l.TileRenderer.Draw(l.Sim.Sun.Frame(), pos.X, pos.Y, float32(radians), false, false)
 	for _, p := range l.Sim.Planets {
 		pos = p.Pos()
-		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
+		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, p.Rotation, p.Scale, false, false)
 	}
 	if l.phantomPlanet != nil {
 		p := l.phantomPlanet

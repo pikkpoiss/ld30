@@ -16,15 +16,22 @@ const (
 	TooClose
 	TooFar
 	Exploding
+	Colliding
+	Barren
+	Dying
+	Dead
 	Phantom
 )
 
 var PlanetaryAnimations = map[PlanetaryState][]int{
-	Sun:      []int{0, 1, 2, 3},
-	Fertile:  []int{8},
-	TooClose: []int{16},
-	TooFar:   []int{24},
-	Phantom:  []int{32},
+	Sun:               []int{0, 1, 2, 3},
+	Fertile:           []int{8, 9, 10, 11, 12, 13, 14, 15},
+	TooClose:          []int{16},
+	TooFar:            []int{24},
+	Phantom:           []int{32},
+	Dying | Exploding: []int{0, 1, 2, 3},
+	Dying | Colliding: []int{0, 1, 2, 3},
+	Dead:              []int{0},
 }
 
 type PlanetaryBody struct {
@@ -40,6 +47,8 @@ type PlanetaryBody struct {
 	Radius               float32
 	Scale                float32
 	DistToSun            float64
+	Created              time.Time
+	Rotation             float32
 }
 
 func NewSun() *PlanetaryBody {
@@ -62,6 +71,8 @@ func NewSun() *PlanetaryBody {
 		Temperature:          27000000,
 		Radius:               length / 2.0,
 		Scale:                scale,
+		Created:              time.Now(),
+		Rotation:             0,
 	}
 	body.SetState(Sun)
 	return body
@@ -69,7 +80,7 @@ func NewSun() *PlanetaryBody {
 
 func NewPlanet(x, y float32) *PlanetaryBody {
 	var (
-		scale  float32 = float32(math.Min(0.6, math.Max(0.2, rand.Float64())))
+		scale  float32 = float32(math.Min(0.7, math.Max(0.2, rand.Float64())))
 		length float32 = 128.0 / PxPerUnit * scale
 	)
 	body := &PlanetaryBody{
@@ -77,7 +88,7 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 			x, y,
 			length, length,
 			0,
-			twodee.Step10Hz,
+			twodee.Step5Hz,
 			[]int{0},
 		),
 		Velocity:             twodee.Pt(0, 0),
@@ -89,6 +100,8 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 		Radius:               length / 2.0,
 		Scale:                scale,
 		DistToSun:            0.0,
+		Created:              time.Now(),
+		Rotation:             rand.Float32(),
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000
@@ -169,6 +182,7 @@ func (p *PlanetaryBody) UpdateTemperature(elapsed time.Duration) {
 }
 
 func (p *PlanetaryBody) Update(elapsed time.Duration) {
+	p.Rotation += float32(elapsed) / (100 * float32(time.Millisecond))
 	p.AnimatingEntity.Update(elapsed)
 	p.UpdatePopulation(elapsed)
 	p.UpdateTemperature(elapsed)
@@ -217,4 +231,11 @@ func (p *PlanetaryBody) CollidesWith(other *PlanetaryBody) bool {
 
 func (p *PlanetaryBody) SetDistToSun(dist float64) {
 	p.DistToSun = dist
+}
+
+func (p *PlanetaryBody) Destroy(interim PlanetaryState) {
+	p.SetState(Dying | interim)
+	p.SetCallback(func() {
+		p.SetState(Dead)
+	})
 }
