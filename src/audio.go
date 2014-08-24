@@ -30,7 +30,7 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 		backgroundMusic  *twodee.Music
 		planetDropEffect *twodee.SoundEffect
 	)
-	if backgroundMusic, err = twodee.NewMusic("assets/music/BGM1.ogg"); err != nil {
+	if backgroundMusic, err = twodee.NewMusic("assets/music/Birth_of_a_Phantom_Planet.ogg"); err != nil {
 		return
 	}
 	if planetDropEffect, err = twodee.NewSoundEffect("assets/sound_effects/PlanetDrop.ogg"); err != nil {
