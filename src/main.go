@@ -1,11 +1,11 @@
 package main
 
 import (
-	"runtime"
-	"time"
-
 	twodee "../libs/twodee"
 	"github.com/go-gl/gl"
+	"math/rand"
+	"runtime"
+	"time"
 )
 
 func init() {
@@ -108,6 +108,8 @@ func (a *Application) CloseGame(e twodee.GETyper) {
 }
 
 func main() {
+	rand.Seed(int64(time.Now().Nanosecond()))
+
 	var (
 		app *Application
 		err error

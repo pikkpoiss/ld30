@@ -14,6 +14,7 @@ type HudLayer struct {
 	planetFont      *twodee.FontFace
 	messageFont     *twodee.FontFace
 	messageText     *twodee.TextCache
+	messageCoords   twodee.Point
 	globalText      *twodee.TextCache
 	timeText        *twodee.TextCache
 	tempText        map[int]*twodee.TextCache
@@ -31,7 +32,7 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 		messageFont *twodee.FontFace
 		background  = color.Transparent
 		exoFont     = "assets/fonts/Exo-SemiBold.ttf"
-		purFont     = "assets/fonts/Puritan-Regular.ttf"
+		abelFont     = "assets/fonts/Abel-Regular.ttf"
 	)
 	if regularFont, err = twodee.NewFontFace(exoFont, 24, color.RGBA{255, 255, 255, 255}, background); err != nil {
 		return
@@ -39,7 +40,7 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 	if planetFont, err = twodee.NewFontFace(exoFont, 18, color.RGBA{255, 255, 255, 255}, background); err != nil {
 		return
 	}
-	if messageFont, err = twodee.NewFontFace(purFont, 18, color.RGBA{255, 243, 190, 255}, background); err != nil {
+	if messageFont, err = twodee.NewFontFace(abelFont, 40, color.RGBA{206, 38, 178, 255}, background); err != nil {
 		return
 	}
 	layer = &HudLayer{
@@ -55,7 +56,6 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 		bounds:      twodee.Rect(0, 0, 1024, 768),
 		game:        game,
 	}
-	layer.messageListener = layer.App.GameEventHandler.AddObserver(DisplayMessage, layer.OnDisplayMessage)
 	err = layer.Reset()
 	return
 }
@@ -135,14 +135,16 @@ func (l *HudLayer) Render() {
 			textCache = twodee.NewTextCache(l.regularFont)
 			l.tempText[p] = textCache
 		}
-		textCache.SetText(fmt.Sprintf("%d°F", planet.GetTemperature()))
+		textCache.SetText(fmt.Sprintf("%v %d°F", planet.Name, planet.GetTemperature()))
 		if textCache.Texture != nil {
 			adjust = twodee.Pt(planet.Radius+0.1, planet.Radius+0.1)
 			screenPos = l.game.WorldToScreenCoords(planetPos.Add(adjust))
 			l.text.Draw(textCache.Texture, screenPos.X, screenPos.Y)
 		}
 	}
-
+	if l.messageText.Texture != nil {
+		l.text.Draw(l.messageText.Texture, l.messageCoords.X, l.messageCoords.Y)
+	}
 	l.text.Unbind()
 }
 
@@ -158,12 +160,23 @@ func (l *HudLayer) Reset() (err error) {
 	if l.text, err = twodee.NewTextRenderer(l.bounds); err != nil {
 		return
 	}
+	l.messageListener = l.App.GameEventHandler.AddObserver(DisplayMessage, l.OnDisplayMessage)
 	return
 }
 
 func (l *HudLayer) OnDisplayMessage(evt twodee.GETyper) {
 	switch event := evt.(type) {
 	case *DisplayMessageEvent:
-		fmt.Printf("MESSAGE: %v\n", event.Message)
+		l.messageText.SetText(event.Message)
+		if l.messageText.Texture != nil {
+			if event.Positioned {
+				l.messageCoords = l.game.WorldToScreenCoords(event.Coords)
+			} else {
+				l.messageCoords = twodee.Point{
+					(l.bounds.Max.X - float32(l.messageText.Texture.OriginalWidth)) / 2.0,
+					(l.bounds.Max.Y - float32(l.messageText.Texture.OriginalHeight)) / 4.0,
+				}
+			}
+		}
 	}
 }

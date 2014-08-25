@@ -18,8 +18,9 @@ You are trying to populate a solar system with life.  You can place Earth-like p
   * [x] Placeholder art
   * [x] Music loading
   * [x] Heads up display of temp, population for planets
+  * [x] Menu system
   * [ ] Different types of planets?
-  * [ ] Planet collisions
+  * [x] Planet collisions
   * [ ] Production art
   * [x] Production music
   * [x] Production sound effects
