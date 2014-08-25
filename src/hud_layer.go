@@ -40,7 +40,7 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 	if planetFont, err = twodee.NewFontFace(exoFont, 18, regColor, background); err != nil {
 		return
 	}
-	if messageFont, err = twodee.NewFontFace(abelFont, 40, regColor, background); err != nil {
+	if messageFont, err = twodee.NewFontFace(abelFont, 40, msgColor, background); err != nil {
 		return
 	}
 	layer = &HudLayer{
