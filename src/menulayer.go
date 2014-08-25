@@ -15,12 +15,6 @@ const (
 	gameOverCode
 )
 
-var (
-	regColor = color.RGBA{200, 200, 200, 255}
-	hiColor  = color.RGBA{255, 240, 120, 255}
-	actColor = color.RGBA{200, 200, 255, 255}
-)
-
 type MenuLayer struct {
 	visible  bool
 	menu     *twodee.Menu
