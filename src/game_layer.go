@@ -28,6 +28,7 @@ type GameLayer struct {
 	ReleasePlanetListener int
 	openMenuListener      int
 	closeMenuListener     int
+	gameOverListener      int
 	DurLeft               time.Duration
 	phantomPlanet         *PlanetaryBody
 	count                 int64
@@ -69,6 +70,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	layer.ReleasePlanetListener = layer.App.GameEventHandler.AddObserver(ReleasePlanet, layer.OnReleasePlanet)
 	layer.openMenuListener = layer.App.GameEventHandler.AddObserver(MenuOpen, layer.OnMenuToggle)
 	layer.closeMenuListener = layer.App.GameEventHandler.AddObserver(MenuClose, layer.OnMenuToggle)
+	layer.gameOverListener = layer.App.GameEventHandler.AddObserver(GameOver, layer.OnGameOver)
 	return
 }
 
@@ -92,6 +94,7 @@ func (l *GameLayer) Delete() {
 	l.App.GameEventHandler.RemoveObserver(ReleasePlanet, l.ReleasePlanetListener)
 	l.App.GameEventHandler.RemoveObserver(MenuOpen, l.openMenuListener)
 	l.App.GameEventHandler.RemoveObserver(MenuClose, l.closeMenuListener)
+	l.App.GameEventHandler.RemoveObserver(GameOver, l.gameOverListener)
 }
 
 func (l *GameLayer) Render() {
@@ -168,9 +171,10 @@ func (l *GameLayer) Update(elapsed time.Duration) {
 	l.DurLeft -= elapsed
 	if l.DurLeft <= 0 {
 		l.DurLeft = time.Duration(0)
-		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(ShowSplash))
-		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PauseMusic))
-		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayGameOverEffect))
+		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(GameOver))
+		//		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(ShowSplash))
+		//		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PauseMusic))
+		//		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayGameOverEffect))
 	}
 }
 
@@ -232,6 +236,10 @@ func (l *GameLayer) OnReleasePlanet(evt twodee.GETyper) {
 
 func (l *GameLayer) OnMenuToggle(evt twodee.GETyper) {
 	l.paused = !l.paused
+}
+
+func (l *GameLayer) OnGameOver(evt twodee.GETyper) {
+	l.paused = true
 }
 
 func (l *GameLayer) WorldToScreenCoords(pt twodee.Point) twodee.Point {

@@ -1,25 +1,27 @@
 package main
 
 import (
-	"../libs/twodee"
 	"time"
+
+	"../libs/twodee"
 )
 
 type OverlayLayer struct {
-	Game               *GameLayer
-	Events             *twodee.GameEventHandler
-	TileRenderer       *twodee.TileRenderer
-	Bounds             twodee.Rectangle
-	Showing            bool
-	Frame              int
-	observerShowSplash int
+	game             *GameLayer
+	events           *twodee.GameEventHandler
+	tileRenderer     *twodee.TileRenderer
+	bounds           twodee.Rectangle
+	visible          bool
+	frame            int
+	gameOverObserver int
 }
 
 func NewOverlayLayer(app *Application, game *GameLayer) (layer *OverlayLayer, err error) {
 	layer = &OverlayLayer{
-		Game:   game,
-		Events: app.GameEventHandler,
-		Bounds: twodee.Rect(-48, -36, 48, 36),
+		game:    game,
+		events:  app.GameEventHandler,
+		bounds:  twodee.Rect(-48, -36, 48, 36),
+		visible: false,
 	}
 	tilem := twodee.TileMetadata{
 		Path:       "/../assets/sun.psd",
@@ -29,39 +31,40 @@ func NewOverlayLayer(app *Application, game *GameLayer) (layer *OverlayLayer, er
 		FramesWide: 1,
 		FramesHigh: 1,
 	}
-	if layer.TileRenderer, err = twodee.NewTileRenderer(layer.Bounds, app.WinBounds, tilem); err != nil {
+	if layer.tileRenderer, err = twodee.NewTileRenderer(layer.bounds, app.WinBounds, tilem); err != nil {
 		return
 	}
-	layer.observerShowSplash = layer.Events.AddObserver(ShowEndScreen, layer.OnShowEndScreen)
+	layer.gameOverObserver = layer.events.AddObserver(GameOver, layer.OnGameOver)
 	return
 }
 
-func (l *OverlayLayer) OnShowEndScreen(e twodee.GETyper) {
+func (l *OverlayLayer) OnGameOver(e twodee.GETyper) {
+	l.visible = true
 }
 
 func (l *OverlayLayer) Delete() {
-	if l.TileRenderer != nil {
-		l.TileRenderer.Delete()
+	if l.tileRenderer != nil {
+		l.tileRenderer.Delete()
 	}
-	l.Events.RemoveObserver(ShowEndScreen, l.observerShowSplash)
+	l.events.RemoveObserver(GameOver, l.gameOverObserver)
 }
 
 func (l *OverlayLayer) Show(frame int) {
-	l.Showing = true
-	l.Frame = frame
+	l.visible = true
+	l.frame = frame
 }
 
 func (l *OverlayLayer) Render() {
-	if !l.Showing {
+	if !l.visible {
 		return
 	}
-	l.TileRenderer.Bind()
-	l.TileRenderer.Draw(l.Frame, 0.5, 0.5, 0, false, false)
-	l.TileRenderer.Unbind()
+	l.tileRenderer.Bind()
+	l.tileRenderer.Draw(l.frame, 0.5, 0.5, 0, false, false)
+	l.tileRenderer.Unbind()
 }
 
 func (l *OverlayLayer) HandleEvent(evt twodee.Event) bool {
-	if !l.Showing {
+	if !l.visible {
 		return true
 	}
 	switch event := evt.(type) {
