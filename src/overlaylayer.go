@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"time"
 
@@ -17,10 +18,12 @@ type OverlayLayer struct {
 	events           *twodee.GameEventHandler
 	tileRenderer     *twodee.TileRenderer
 	bounds           twodee.Rectangle
+	tileM            twodee.TileMetadata
 	text             *twodee.TextRenderer
 	regFont          *twodee.FontFace
-	tileM            twodee.TileMetadata
 	offset           twodee.Point
+	popFont          *twodee.FontFace
+	maxPopCache      *twodee.TextCache
 	cheevosCache     map[int]*twodee.TextCache
 	visible          bool
 	frame            int
@@ -30,6 +33,7 @@ type OverlayLayer struct {
 func NewOverlayLayer(app *Application, game *GameLayer) (layer *OverlayLayer, err error) {
 	var (
 		regFont *twodee.FontFace
+		popFont *twodee.FontFace
 		bg      = color.Transparent
 		exoFont = "assets/fonts/Exo-SemiBold.ttf"
 		tileM   twodee.TileMetadata
@@ -37,12 +41,14 @@ func NewOverlayLayer(app *Application, game *GameLayer) (layer *OverlayLayer, er
 	if regFont, err = twodee.NewFontFace(exoFont, 24, regColor, bg); err != nil {
 		return
 	}
+	if popFont, err = twodee.NewFontFace(exoFont, 24, hiColor, bg); err != nil {
+		return
+	}
 	tileM = twodee.TileMetadata{
-		// TODO: Get an overlay png full of cool tiles.
-		Path:       "assets/sun.png",
-		PxPerUnit:  320,
-		TileWidth:  320,
-		TileHeight: 320,
+		Path:       "assets/final.png",
+		PxPerUnit:  1,
+		TileWidth:  1024,
+		TileHeight: 768,
 		FramesWide: 1,
 		FramesHigh: 1,
 	}
@@ -52,9 +58,12 @@ func NewOverlayLayer(app *Application, game *GameLayer) (layer *OverlayLayer, er
 		events:       app.GameEventHandler,
 		bounds:       app.WinBounds,
 		regFont:      regFont,
-		offset:       twodee.Pt(80, 500),
+		popFont:      popFont,
+		offset:       twodee.Pt(200, 260),
 		cheevosCache: map[int]*twodee.TextCache{},
+		maxPopCache:  twodee.NewTextCache(popFont),
 		visible:      false,
+		frame:        overlayEndFrame,
 		tileM:        tileM,
 	}
 	layer.Reset()
@@ -70,15 +79,11 @@ func (l *OverlayLayer) Delete() {
 	if l.tileRenderer != nil {
 		l.tileRenderer.Delete()
 	}
+	l.maxPopCache.Delete()
 	for _, v := range l.cheevosCache {
 		v.Clear()
 	}
 	l.events.RemoveObserver(GameOver, l.gameOverObserver)
-}
-
-func (l *OverlayLayer) Show(frame int) {
-	l.visible = true
-	l.frame = frame
 }
 
 func (l *OverlayLayer) Render() {
@@ -93,10 +98,17 @@ func (l *OverlayLayer) Render() {
 		ok        bool
 	)
 	l.tileRenderer.Bind()
-	l.tileRenderer.Draw(l.frame, 0.5, 0.5, 0, false, false)
+	l.tileRenderer.Draw(l.frame, 512, 384, 0, false, false)
 	l.tileRenderer.Unbind()
 
 	l.text.Bind()
+	l.maxPopCache.SetText(fmt.Sprintf("Maximum Population: %d", l.game.Sim.GetMaxPopulation()))
+	if l.maxPopCache.Texture != nil {
+		y = y - float32(l.maxPopCache.Texture.Height)
+		l.text.Draw(l.maxPopCache.Texture, x, y)
+	}
+	// Put a little padding between max pop and cheevos.
+	y -= 15
 	for i, item := range l.game.Cheevos.Passed {
 		if textCache, ok = l.cheevosCache[i]; !ok {
 			textCache = twodee.NewTextCache(l.regFont)
@@ -131,11 +143,13 @@ func (l *OverlayLayer) HandleEvent(evt twodee.Event) bool {
 }
 
 func (l *OverlayLayer) NewGame() bool {
-	if err := l.Reset(); err != nil {
-		// TODO: Ugh, see if we can reset GameLayer?
-		return false
-	}
+	// Can't handle new games yet...
 	return false
+	//	if err := l.Reset(); err != nil {
+	//		// TODO: Ugh, see if we can reset GameLayer?
+	//		return false
+	//	}
+	//	return false
 }
 
 func (l *OverlayLayer) Update(elapsed time.Duration) {
