@@ -121,9 +121,9 @@ func (l *MenuLayer) HandleEvent(evt twodee.Event) bool {
 		)
 		for i, item := range l.menu.Items() {
 			if item.Highlighted() {
-				texture = l.highlightCache.Texture
+				texture = l.hiCache.Texture
 			} else if item.Active() {
-				texture = l.activeCache.Texture
+				texture = l.actCache.Texture
 			} else {
 				if textCache, ok = l.cache[i]; ok {
 					texture = textCache.Texture
@@ -133,7 +133,7 @@ func (l *MenuLayer) HandleEvent(evt twodee.Event) bool {
 				y = y - float32(texture.Height)
 				if my >= y {
 					if !item.Highlighted() {
-						l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(MenuClick))
+						l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(MenuClick))
 						l.menu.HighlightItem(item)
 					}
 					break
