@@ -8,12 +8,14 @@ type AudioSystem struct {
 	planetDropEffect                *twodee.SoundEffect
 	planetFireDeathEffect           *twodee.SoundEffect
 	planetCollisionEffect           *twodee.SoundEffect
+	victoryEffect                   *twodee.SoundEffect
 	backgroundMusicObserverId       int
 	pauseMusicObserverId            int
 	resumeMusicObserverId           int
 	planetDropEffectObserverId      int
 	planetFireDeathEffectObserverId int
 	planetCollisionEffectObserverId int
+	gameOverObserverId              int
 }
 
 func (a *AudioSystem) PlayBackgroundMusic(e twodee.GETyper) {
@@ -50,6 +52,13 @@ func (a *AudioSystem) PlayPlanetCollisionEffect(e twodee.GETyper) {
 	}
 }
 
+func (a *AudioSystem) OnGameOver(e twodee.GETyper) {
+	if twodee.MusicIsPlaying() {
+		twodee.PauseMusic()
+	}
+	a.victoryEffect.PlayChannel(5, 1)
+}
+
 func (a *AudioSystem) Delete() {
 	a.app.GameEventHandler.RemoveObserver(PlayBackgroundMusic, a.backgroundMusicObserverId)
 	a.app.GameEventHandler.RemoveObserver(PauseMusic, a.pauseMusicObserverId)
@@ -57,10 +66,12 @@ func (a *AudioSystem) Delete() {
 	a.app.GameEventHandler.RemoveObserver(ReleasePlanet, a.planetDropEffectObserverId)
 	a.app.GameEventHandler.RemoveObserver(PlanetFireDeath, a.planetFireDeathEffectObserverId)
 	a.app.GameEventHandler.RemoveObserver(PlanetCollision, a.planetCollisionEffectObserverId)
+	a.app.GameEventHandler.RemoveObserver(GameOver, a.gameOverObserverId)
 	a.backgroundMusic.Delete()
 	a.planetDropEffect.Delete()
 	a.planetFireDeathEffect.Delete()
 	a.planetCollisionEffect.Delete()
+	a.victoryEffect.Delete()
 }
 
 func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
@@ -69,6 +80,7 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 		planetDropEffect      *twodee.SoundEffect
 		planetFireDeathEffect *twodee.SoundEffect
 		planetCollisionEffect *twodee.SoundEffect
+		victoryEffect         *twodee.SoundEffect
 	)
 	if backgroundMusic, err = twodee.NewMusic("assets/music/Birth_of_a_Phantom_Planet.ogg"); err != nil {
 		return
@@ -82,12 +94,16 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 	if planetCollisionEffect, err = twodee.NewSoundEffect("assets/sound_effects/PlanetCollision.ogg"); err != nil {
 		return
 	}
+	if victoryEffect, err = twodee.NewSoundEffect("assets/sound_effects/VictoryEffect.ogg"); err != nil {
+		return
+	}
 	audioSystem = &AudioSystem{
 		app:                   app,
 		backgroundMusic:       backgroundMusic,
 		planetDropEffect:      planetDropEffect,
 		planetFireDeathEffect: planetFireDeathEffect,
 		planetCollisionEffect: planetCollisionEffect,
+		victoryEffect:         victoryEffect,
 	}
 	planetDropEffect.SetVolume(100)
 	planetFireDeathEffect.SetVolume(60)
@@ -98,6 +114,6 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 	audioSystem.planetCollisionEffectObserverId = app.GameEventHandler.AddObserver(PlanetCollision, audioSystem.PlayPlanetCollisionEffect)
 	audioSystem.pauseMusicObserverId = app.GameEventHandler.AddObserver(PauseMusic, audioSystem.PauseMusic)
 	audioSystem.resumeMusicObserverId = app.GameEventHandler.AddObserver(ResumeMusic, audioSystem.ResumeMusic)
-	return
+	audioSystem.gameOverObserverId = app.GameEventHandler.AddObserver(GameOver, audioSystem.OnGameOver)
 	return
 }

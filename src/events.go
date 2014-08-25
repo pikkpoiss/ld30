@@ -11,15 +11,15 @@ const (
 	PlanetFireDeath
 	PlanetCollision
 	ReleasePlanet
-	ShowSplash
 	PauseMusic
 	ResumeMusic
-	PlayGameOverEffect
+	GameOver
 	DisplayMessage
 	MenuOpen
 	MenuClose
 	MenuClick
 	MenuSel
+	ShowEndScreen
 	sentinel
 )
 
@@ -31,7 +31,7 @@ type DisplayMessageEvent struct {
 	twodee.BasicGameEvent
 	Positioned bool
 	Coords     twodee.Point
-	Message string
+	Message    string
 }
 
 type DropPlanetEvent struct {

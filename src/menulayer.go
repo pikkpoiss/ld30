@@ -12,6 +12,7 @@ const (
 	settingCode
 	exitCode
 	musicCode
+	gameOverCode
 )
 
 var (
@@ -60,6 +61,8 @@ func NewMenuLayer(app *Application, offset twodee.Point) (layer *MenuLayer, err 
 	menu, err = twodee.NewMenu([]twodee.MenuItem{
 		twodee.NewKeyValueMenuItem("Music On/Off", programCode, musicCode),
 		twodee.NewKeyValueMenuItem("Exit", programCode, exitCode),
+		// TODO: REMOVE.
+		twodee.NewKeyValueMenuItem("Game Over", programCode, gameOverCode),
 	})
 	if err != nil {
 		return
@@ -186,6 +189,10 @@ func (l *MenuLayer) handleMenuItem(data *twodee.MenuItemData) {
 			}
 		case exitCode:
 			l.app.InitiateCloseGame = true
+		case gameOverCode:
+			l.visible = false
+			l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(MenuClose))
+			l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(GameOver))
 		}
 	}
 }
