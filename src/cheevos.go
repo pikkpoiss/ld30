@@ -28,6 +28,7 @@ func NewCheevos(events *twodee.GameEventHandler, sim *Simulation) *Cheevos {
 			NewTotalPopulation(10000),
 			NewMultiPlanets(4, 6),
 			NewTotalPopulation(1000000),
+			NewSacrifice(5000),
 		},
 		sim:     sim,
 		active:  nil,
@@ -450,4 +451,98 @@ func (c *TotalPopulation) IsSuccess(sim *Simulation) bool {
 	}
 	waitTime := c.GetInterval() * time.Duration(len(c.introText))
 	return c.GetElapsed() > waitTime && c.hasPassed
+}
+
+// SACRIFICE ===================================================================
+
+type Sacrifice struct {
+	*BaseCheevo
+	hasPassed  bool
+	hasFailed  bool
+	population int32
+	target     *PlanetaryBody
+	planetName string
+	events     *twodee.GameEventHandler
+	obsFire    int
+	obsColl    int
+}
+
+func NewSacrifice(population int32) Cheevo {
+	return &Sacrifice{
+		BaseCheevo: newBaseCheevo(
+			"MADE THE ULTIMATE SACRIFICE",
+			300*time.Second),
+		hasPassed:  false,
+		hasFailed:  false,
+		population: population,
+	}
+}
+
+func (c *Sacrifice) Init(events *twodee.GameEventHandler) {
+	c.SendMessages([]string{
+		"I AM UNFULFILLED",
+		"YOU HAVE BROUGHT SO MANY SOULS TO ME",
+		fmt.Sprintf("BRING %v INTO MY GREATNESS", c.planetName),
+	}, events)
+	c.obsFire = events.AddObserver(PlanetFireDeath, c.OnFireDeath)
+	c.obsColl = events.AddObserver(PlanetCollision, c.OnCollision)
+	c.events = events
+}
+
+func (c *Sacrifice) OnFireDeath(evt twodee.GETyper) {
+	switch event := evt.(type) {
+	case *PlanetEvent:
+		if event.Planet == c.target {
+			c.hasPassed = true
+		}
+	}
+}
+
+func (c *Sacrifice) OnCollision(evt twodee.GETyper) {
+	switch event := evt.(type) {
+	case *PlanetEvent:
+		if event.Planet == c.target {
+			c.hasFailed = true
+		}
+	}
+}
+
+func (c *Sacrifice) Failure(events *twodee.GameEventHandler) {
+	c.ClearCallbacks()
+	c.SendMessages([]string{
+		"I AM AN ANGRY SOL!",
+	}, events)
+}
+
+func (c *Sacrifice) Success(events *twodee.GameEventHandler) {
+	c.ClearCallbacks()
+	c.SendMessages([]string{
+		fmt.Sprintf("%v IS MINE!", c.planetName),
+	}, events)
+}
+
+func (c *Sacrifice) IsAvailable(sim *Simulation) bool {
+	for _, p := range sim.Planets {
+		if int(p.Population) > int(c.population) {
+			c.target = p
+			c.planetName = p.Name
+			return true
+		}
+	}
+	return false
+}
+
+func (c *Sacrifice) IsSuccess(sim *Simulation) bool {
+	waitTime := c.GetInterval() * time.Duration(3)
+	return c.GetElapsed() > waitTime && c.hasPassed
+}
+
+func (c *Sacrifice) IsFailure(sim *Simulation) bool {
+	return c.BaseCheevo.IsFailure(sim) || c.hasFailed
+}
+
+func (c *Sacrifice) Delete() {
+	c.BaseCheevo.Delete()
+	c.events.RemoveObserver(PlanetFireDeath, c.obsFire)
+	c.events.RemoveObserver(PlanetCollision, c.obsColl)
 }
