@@ -21,7 +21,8 @@ type OverlayLayer struct {
 	text             *twodee.TextRenderer
 	regFont          *twodee.FontFace
 	tileM            twodee.TileMetadata
-	cheevosText      *twodee.TextCache
+	offset           twodee.Point
+	cheevosCache     map[int]*twodee.TextCache
 	visible          bool
 	frame            int
 	gameOverObserver int
@@ -47,14 +48,15 @@ func NewOverlayLayer(app *Application, game *GameLayer) (layer *OverlayLayer, er
 		FramesHigh: 1,
 	}
 	layer = &OverlayLayer{
-		app:         app,
-		game:        game,
-		events:      app.GameEventHandler,
-		bounds:      twodee.Rect(-48, -36, 48, 36),
-		regFont:     regFont,
-		cheevosText: twodee.NewTextCache(regFont),
-		visible:     false,
-		tileM:       tileM,
+		app:          app,
+		game:         game,
+		events:       app.GameEventHandler,
+		bounds:       app.WinBounds,
+		regFont:      regFont,
+		offset:       twodee.Pt(80, 500),
+		cheevosCache: map[int]*twodee.TextCache{},
+		visible:      false,
+		tileM:        tileM,
 	}
 	layer.Reset()
 	return
@@ -69,7 +71,9 @@ func (l *OverlayLayer) Delete() {
 	if l.tileRenderer != nil {
 		l.tileRenderer.Delete()
 	}
-	l.cheevosText.Delete()
+	for _, v := range l.cheevosCache {
+		v.Clear()
+	}
 	l.events.RemoveObserver(GameOver, l.gameOverObserver)
 }
 
@@ -83,15 +87,29 @@ func (l *OverlayLayer) Render() {
 		return
 	}
 	var (
-		y    float32
-		maxY = l.bounds.Max.Y
+		y       = l.bounds.Max.Y - l.offsetY
+		x       = l.offset.X
+		texture *twodee.Texture
 	)
 	l.tileRenderer.Bind()
 	l.tileRenderer.Draw(l.frame, 0.5, 0.5, 0, false, false)
 	l.tileRenderer.Unbind()
 
 	l.text.Bind()
-	text := fmt.Sprintf("hihi")
+	for i, item := range l.game.Cheevos.GetSatisfied() {
+		if textCache, ok = l.cache[i]; !ok {
+			textCache = twodee.NewTextCache(l.regFont)
+			l.cache[i] = textCache
+		}
+		textCache.SetText(item.Label())
+		texture = textCache.Texture
+		if texture != nil {
+			y = y - float32(texture.Height)
+			l.text.Draw(texture, x, y)
+		}
+		// FINISH
+	}
+	text := fmt.Sprintf("hihi\nhow\nare\nyou")
 	l.cheevosText.SetText(text)
 	if l.cheevosText.Texture != nil {
 		y = maxY - float32(l.cheevosText.Texture.Height)
