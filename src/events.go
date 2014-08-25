@@ -13,6 +13,10 @@ const (
 	PauseMusic
 	PlayGameOverEffect
 	DisplayMessage
+	MenuOpen
+	MenuClose
+	MenuClick
+	MenuSel
 	sentinel
 )
 

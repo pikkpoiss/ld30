@@ -1,10 +1,11 @@
 package main
 
 import (
-	twodee "../libs/twodee"
-	"github.com/go-gl/gl"
 	"runtime"
 	"time"
+
+	twodee "../libs/twodee"
+	"github.com/go-gl/gl"
 )
 
 func init() {
@@ -28,6 +29,7 @@ func NewApplication() (app *Application, err error) {
 		context           *twodee.Context
 		gameLayer         *GameLayer
 		hudLayer          *HudLayer
+		menuLayer         *MenuLayer
 		winbounds         = twodee.Rect(0, 0, 1024, 768)
 		gameEventHandler  = twodee.NewGameEventHandler(NumGameEventTypes)
 		initiateCloseGame = false
@@ -54,12 +56,16 @@ func NewApplication() (app *Application, err error) {
 	if hudLayer, err = NewHudLayer(app, gameLayer); err != nil {
 		return
 	}
+	if menuLayer, err = NewMenuLayer(app); err != nil {
+		return
+	}
 	if app.AudioSystem, err = NewAudioSystem(app); err != nil {
 		return
 	}
 
 	layers.Push(gameLayer)
 	layers.Push(hudLayer)
+	layers.Push(menuLayer)
 	app.gameClosingObserverId = app.GameEventHandler.AddObserver(GameIsClosing, app.CloseGame)
 	app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayBackgroundMusic))
 	return
