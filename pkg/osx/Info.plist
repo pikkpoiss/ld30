@@ -9,9 +9,9 @@
   <key>CFBundleIdentifier</key>
   <string>us.regio.eg</string>
   <key>CFBundleName</key>
-  <string>LD30</string>
+  <string>Sol</string>
   <key>CFBundleIconFile</key>
-  <string>LD30.icns</string>
+  <string>sol.icns</string>
   <key>CFBundleShortVersionString</key>
   <string>9.9.9</string>
   <key>CFBundleInfoDictionaryVersion</key>
