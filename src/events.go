@@ -22,8 +22,8 @@ const (
 
 type DisplayMessageEvent struct {
 	twodee.BasicGameEvent
-	X       float32
-	Y       float32
+	Positioned bool
+	Coords     twodee.Point
 	Message string
 }
 
@@ -53,12 +53,20 @@ func NewReleasePlanetEvent(x, y float32) (e *ReleasePlanetEvent) {
 	return
 }
 
-func NewDisplayMessageEvent(x, y float32, message string) (e *DisplayMessageEvent) {
-	e = &DisplayMessageEvent{
+func NewPositionedMessageEvent(pt twodee.Point, message string) (e *DisplayMessageEvent) {
+	return &DisplayMessageEvent{
 		*twodee.NewBasicGameEvent(DisplayMessage),
-		x,
-		y,
+		true,
+		pt,
 		message,
 	}
-	return
+}
+
+func NewMessageEvent(message string) (e *DisplayMessageEvent) {
+	return &DisplayMessageEvent{
+		*twodee.NewBasicGameEvent(DisplayMessage),
+		false,
+		twodee.Pt(0, 0),
+		message,
+	}
 }

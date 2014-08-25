@@ -59,7 +59,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	if layer.Starmap, err = LoadMap("assets/starmap.tmx"); err != nil {
 		return
 	}
-	layer.Cheevos = NewCheevos(layer.App.GameEventHandler)
+	layer.Cheevos = NewCheevos(layer.App.GameEventHandler, layer.Sim)
 	layer.DropPlanetListener = layer.App.GameEventHandler.AddObserver(DropPlanet, layer.OnDropPlanet)
 	layer.ReleasePlanetListener = layer.App.GameEventHandler.AddObserver(ReleasePlanet, layer.OnReleasePlanet)
 	return
