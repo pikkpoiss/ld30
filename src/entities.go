@@ -4,8 +4,8 @@ import (
 	twodee "../libs/twodee"
 	"math"
 	"math/rand"
-	"time"
 	"strings"
+	"time"
 )
 
 type PlanetaryState int32
@@ -167,6 +167,20 @@ var PlanetNames = []string{
 	"Discworld",
 	"Druidia",
 	"Marklar",
+	"Meekrab",
+	"Caan",
+	"LV-256",
+	"Grunedar",
+	"So",
+	"Rath",
+	"Hungar",
+	"Earf",
+	"Real Earth",
+	"Jumanji",
+	"Alexander",
+	"Giger",
+	"Maailm",
+	"Zardoz",
 }
 
 var PlanetNameIndex int = 0
