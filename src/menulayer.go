@@ -174,6 +174,12 @@ func (l *MenuLayer) handleMenuItem(data *twodee.MenuItemData) {
 		switch data.Value {
 		case musicCode:
 			// TODO: Write code that mutes/un-mutes music.
+			if twodee.MusicIsPaused() {
+				l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(ResumeMusic))
+			} else {
+				l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PauseMusic))
+
+			}
 		case exitCode:
 			l.app.InitiateCloseGame = true
 		}
