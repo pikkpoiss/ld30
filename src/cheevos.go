@@ -13,10 +13,12 @@ type Cheevos struct {
 	active  Cheevo
 	wait    time.Duration
 	counter time.Duration
+	Passed  []string
 }
 
 func NewCheevos(events *twodee.GameEventHandler, sim *Simulation) *Cheevos {
 	return &Cheevos{
+		Passed: []string{},
 		events: events,
 		queue: []Cheevo{
 			NewMakeFirstPlanet(),
@@ -43,6 +45,7 @@ func (c *Cheevos) Update(elapsed time.Duration) {
 		if c.active.IsSuccess(c.sim) && !c.active.IsDone() {
 			c.active.Success(c.events)
 			c.active.SetDone()
+			c.Passed = append(c.Passed, c.active.GetLabel())
 		} else if c.active.IsFailure(c.sim) && !c.active.IsDone() {
 			c.active.Failure(c.events)
 			c.active.SetDone()
