@@ -72,11 +72,13 @@ func (s *Simulation) doCollisions() {
 	for index := 0; index < len(s.Planets); index++ {
 		for j := index + 1; j < len(s.Planets); j++ {
 			if s.Planets[index].CollidesWith(s.Planets[j]) {
+				s.Events.Enqueue(twodee.NewBasicGameEvent(PlanetCollision))
 				s.destroyPlanet(index, Colliding)
 				s.destroyPlanet(j, Colliding)
 			}
 		}
 		if s.Planets[index].CollidesWith(s.Sun) {
+			s.Events.Enqueue(twodee.NewBasicGameEvent(PlanetFireDeath))
 			s.destroyPlanet(index, Exploding)
 		}
 		if !s.Bounds.ContainsPoint(s.Planets[index].Pos()) {

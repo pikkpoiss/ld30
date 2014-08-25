@@ -87,25 +87,25 @@ func (l *GameLayer) Delete() {
 
 func (l *GameLayer) Render() {
 	var (
-		pos twodee.Point
+		pos     twodee.Point
 		radians float64
 	)
 	l.count = (l.count + 2) % 100000000
-	radians = 0.0174532925*float64(l.count)
+	radians = 0.0174532925 * float64(l.count)
 	var glow = math.Sin(radians) * 0.1
 	l.GlowRenderer.Bind()
 	l.GlowRenderer.SetStrength(float32(0.3 + glow))
 
 	/*
-	// Enable planets to block out aura.
-	l.TileRenderer.Bind()
-	l.GlowRenderer.DisableOutput()
-	for _, p := range l.Sim.Planets {
-		pos = p.Pos()
-		l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
-	}
-	l.GlowRenderer.EnableOutput()
-	l.TileRenderer.Unbind()
+		// Enable planets to block out aura.
+		l.TileRenderer.Bind()
+		l.GlowRenderer.DisableOutput()
+		for _, p := range l.Sim.Planets {
+			pos = p.Pos()
+			l.TileRenderer.DrawScaled(p.Frame(), pos.X, pos.Y, 0, p.Scale, false, false)
+		}
+		l.GlowRenderer.EnableOutput()
+		l.TileRenderer.Unbind()
 	*/
 
 	l.BatchRenderer.Bind()
