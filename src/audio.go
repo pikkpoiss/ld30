@@ -68,9 +68,11 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 		planetCollisionEffect: planetCollisionEffect,
 	}
 	planetDropEffect.SetVolume(60)
+	planetFireDeathEffect.SetVolume(60)
+	planetCollisionEffect.SetVolume(60)
 	audioSystem.backgroundMusicObserverId = app.GameEventHandler.AddObserver(PlayBackgroundMusic, audioSystem.PlayBackgroundMusic)
 	audioSystem.planetDropEffectObserverId = app.GameEventHandler.AddObserver(DropPlanet, audioSystem.PlayPlanetDropEffect)
-	audioSystem.planetFireDeathEffectObserverId = app.GameEventHandler.AddObserver(DropPlanet, audioSystem.PlayPlanetFireDeathEffect)
-	audioSystem.planetCollisionEffectObserverId = app.GameEventHandler.AddObserver(DropPlanet, audioSystem.PlayPlanetCollisionEffect)
+	audioSystem.planetFireDeathEffectObserverId = app.GameEventHandler.AddObserver(PlanetFireDeath, audioSystem.PlayPlanetFireDeathEffect)
+	audioSystem.planetCollisionEffectObserverId = app.GameEventHandler.AddObserver(PlanetCollision, audioSystem.PlayPlanetCollisionEffect)
 	return
 }

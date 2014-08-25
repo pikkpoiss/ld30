@@ -8,6 +8,8 @@ const (
 	GameIsClosing twodee.GameEventType = iota
 	PlayBackgroundMusic
 	DropPlanet
+	PlanetFireDeath
+	PlanetCollision
 	ReleasePlanet
 	ShowSplash
 	PauseMusic
