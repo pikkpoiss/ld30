@@ -20,6 +20,7 @@ const (
 	MenuClose
 	MenuClick
 	MenuSel
+	ShowEndScreen
 	sentinel
 )
 
