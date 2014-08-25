@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/rand"
 	"time"
+	"strings"
 )
 
 type PlanetaryState int32
@@ -49,6 +50,134 @@ type PlanetaryBody struct {
 	DistToSun            float64
 	Created              time.Time
 	Rotation             float32
+	Name                 string
+}
+
+var PlanetNames = []string{
+	"Arrakis",
+	"Earth",
+	"Earth Two",
+	"Titan",
+	"Potato",
+	"Planetos",
+	"Hoth",
+	"Solaris",
+	"Athas",
+	"Rigel VII",
+	"Geonosis",
+	"Kerona",
+	"Kharak",
+	"Klendathu",
+	"Tatooine",
+	"Titania",
+	"Tophet",
+	"Vega",
+	"Vulcan",
+	"Aegis VIII",
+	"Altair IV",
+	"Amel",
+	"Bronson Beta",
+	"Dagobah",
+	"Cybertron",
+	"Demeter",
+	"Darwin VII",
+	"Keith Moon",
+	"Eternia",
+	"Etheria",
+	"Erna",
+	"Fhloston Paradise",
+	"Fiorina",
+	"Gaia",
+	"Gorta",
+	"Gurun",
+	"He",
+	"Helliconia",
+	"Hiigara",
+	"Hydros",
+	"Ishtar",
+	"Iszm",
+	"Irk",
+	"Kerbal",
+	"K-PAX",
+	"Krull",
+	"Leera",
+	"Lithia",
+	"LittleBigPlanet",
+	"Lumen",
+	"Acheron",
+	"Medea",
+	"Melancholia",
+	"Mobius",
+	"Mongo",
+	"Mor-Tax",
+	"Miron",
+	"Minerva",
+	"Nacre",
+	"New Terra",
+	"Old Terra",
+	"Nidor",
+	"Nihil",
+	"Nirn",
+	"Omega",
+	"Omicron Persei 8",
+	"Optera",
+	"Orthe",
+	"Pandora",
+	"Pern",
+	"Pharagos",
+	"Placet",
+	"Pyrrus",
+	"Ragnarok",
+	"Reach",
+	"Regis III",
+	"Requiem",
+	"Reverie",
+	"Riverworld",
+	"Rosetta",
+	"Rubanis",
+	"Rylos",
+	"Sangre",
+	"Sauria",
+	"Sera",
+	"Siren",
+	"Shora",
+	"Skaro",
+	"Stroggos",
+	"Tanis",
+	"Terminus",
+	"Thra",
+	"Thundera",
+	"Tiamat",
+	"Titan",
+	"Tirol",
+	"Tranai",
+	"Trantor",
+	"Twinsun",
+	"Vekta",
+	"Vinea",
+	"Wormwood",
+	"Zahir",
+	"Zarkon",
+	"Zavron",
+	"Zeelich",
+	"Zeist",
+	"Stephanie",
+	"Perstephanie",
+	"Ringworld",
+	"Discworld",
+	"Druidia",
+	"Marklar",
+}
+
+var PlanetNameIndex int = 0
+
+func SelectPlanetName() string {
+	var choice = rand.Intn(len(PlanetNames) - PlanetNameIndex)
+	var name = PlanetNames[choice]
+	PlanetNames[choice] = PlanetNames[PlanetNameIndex]
+	PlanetNames[PlanetNameIndex] = name
+	PlanetNameIndex = (PlanetNameIndex + 1) % len(PlanetNames)
+	return strings.ToUpper(name)
 }
 
 func NewSun() *PlanetaryBody {
@@ -73,6 +202,7 @@ func NewSun() *PlanetaryBody {
 		Scale:                scale,
 		Created:              time.Now(),
 		Rotation:             0,
+		Name:                 "Sol",
 	}
 	body.SetState(Sun)
 	return body
@@ -102,6 +232,7 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 		DistToSun:            0.0,
 		Created:              time.Now(),
 		Rotation:             rand.Float32(),
+		Name:                 SelectPlanetName(),
 	}
 	body.SetState(Fertile)
 	body.MaxPopulation = body.Mass * 1000

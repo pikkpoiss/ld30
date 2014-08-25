@@ -135,7 +135,7 @@ func (l *HudLayer) Render() {
 			textCache = twodee.NewTextCache(l.regularFont)
 			l.tempText[p] = textCache
 		}
-		textCache.SetText(fmt.Sprintf("%d°F", planet.GetTemperature()))
+		textCache.SetText(fmt.Sprintf("%v %d°F", planet.Name, planet.GetTemperature()))
 		if textCache.Texture != nil {
 			adjust = twodee.Pt(planet.Radius+0.1, planet.Radius+0.1)
 			screenPos = l.game.WorldToScreenCoords(planetPos.Add(adjust))
@@ -173,8 +173,8 @@ func (l *HudLayer) OnDisplayMessage(evt twodee.GETyper) {
 				l.messageCoords = l.game.WorldToScreenCoords(event.Coords)
 			} else {
 				l.messageCoords = twodee.Point{
-					(l.bounds.Max.X - float32(l.messageText.Texture.Width)) / 2.0,
-					(l.bounds.Max.Y - float32(l.messageText.Texture.Height)) / 4.0,
+					(l.bounds.Max.X - float32(l.messageText.Texture.OriginalWidth)) / 2.0,
+					(l.bounds.Max.Y - float32(l.messageText.Texture.OriginalHeight)) / 4.0,
 				}
 			}
 		}

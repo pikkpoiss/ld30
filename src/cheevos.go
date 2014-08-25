@@ -26,6 +26,13 @@ func NewCheevos(events *twodee.GameEventHandler, sim *Simulation) *Cheevos {
 func (c *Cheevos) Update(elapsed time.Duration) {
 	if c.active != nil {
 		c.active.Update(elapsed)
+		if c.active.IsSatisfied(c.sim) {
+			c.active.Success(c.events)
+		}
+		if c.active.IsReadyToDelete() {
+			c.active.Delete()
+			c.active = nil
+		}
 	} else {
 		c.selectActive()
 	}
@@ -50,20 +57,27 @@ func (c *Cheevos) Delete() {
 
 type Cheevo interface {
 	Init(events *twodee.GameEventHandler)
+	Success(events *twodee.GameEventHandler)
 	IsAvailable(sim *Simulation) bool
+	IsSatisfied(sim *Simulation) bool
+	IsReadyToDelete() bool
 	GetLabel() string
+	GetElapsed() time.Duration
 	Update(elapsed time.Duration)
+	Delete()
 }
 
 type BaseCheevo struct {
 	label     string
 	callbacks []*Callback
+	elapsed   time.Duration
 }
 
 func newBaseCheevo(label string) *BaseCheevo {
 	return &BaseCheevo{
 		label:     label,
 		callbacks: []*Callback{},
+		elapsed:   0,
 	}
 }
 
@@ -71,47 +85,39 @@ func (c *BaseCheevo) GetLabel() string {
 	return c.label
 }
 
-type Callback struct {
-	Elapsed time.Duration
-	Trigger time.Duration
-	Func    func()
-	Done    bool
+func (c *BaseCheevo) GetElapsed() time.Duration {
+	return c.elapsed
 }
 
-func CallAfter(duration time.Duration, f func()) *Callback {
-	return &Callback{
-		Elapsed: 0,
-		Trigger: duration,
-		Func:    f,
-		Done:    false,
-	}
-}
-
-func (c *Callback) Update(elapsed time.Duration) {
-	c.Elapsed += elapsed
-	if c.Elapsed >= c.Trigger {
-		c.Done = true
-		c.Func()
-	}
+func (c *BaseCheevo) HasPendingCallbacks() bool {
+	return len(c.callbacks) > 0
 }
 
 func (c *BaseCheevo) After(d time.Duration, f func()) {
 	c.callbacks = append(c.callbacks, CallAfter(d, f))
 }
 
-func sendMessage(msg string, events *twodee.GameEventHandler) func() {
+func (c *BaseCheevo) ClearCallbacks() {
+	c.callbacks = []*Callback{}
+}
+
+func (c *BaseCheevo) Delete() {
+	c.ClearCallbacks()
+}
+
+func (c *BaseCheevo) sendMessage(msg string, events *twodee.GameEventHandler) func() {
 	return func() {
 		events.Enqueue(NewMessageEvent(msg))
 	}
 }
 
 func (c *BaseCheevo) SendMessages(messages []string, interval time.Duration, events *twodee.GameEventHandler) {
-	counter := interval
+	var counter time.Duration = 0
 	for i := 0; i < len(messages); i++ {
-		c.After(counter, sendMessage(messages[i], events))
+		c.After(counter, c.sendMessage(messages[i], events))
 		counter += interval
 	}
-	c.After(counter, sendMessage("", events))
+	c.After(counter, c.sendMessage("", events))
 }
 
 func (c *BaseCheevo) Update(elapsed time.Duration) {
@@ -121,26 +127,67 @@ func (c *BaseCheevo) Update(elapsed time.Duration) {
 			c.callbacks = append(c.callbacks[:i], c.callbacks[i+1:]...)
 		}
 	}
+	c.elapsed += elapsed
+}
+
+func (c *BaseCheevo) IsReadyToDelete() bool {
+	return !c.HasPendingCallbacks()
 }
 
 type MakeFirstPlanet struct {
 	*BaseCheevo
+	seconds    int
+	hasCreated bool
+	interval   time.Duration
+	done       bool
+	introText  []string
 }
 
 func NewMakeFirstPlanet() Cheevo {
 	return &MakeFirstPlanet{
 		BaseCheevo: newBaseCheevo("Make first planet"),
+		hasCreated: false,
+		interval:   3 * time.Second,
+		done:       false,
+		introText: []string{
+			"",
+			"HELLO",
+			"WELCOME TO MY SYSTEM",
+			"",
+			"I SEE THAT YOU ARE ABLE TO MAKE PLANETS",
+			"COULD YOU MAKE ONE FOR ME?",
+			"",
+			"CLICK, DRAG THE MOUSE, AND LET GO",
+			"CLICK, DRAG THE MOUSE, AND LET GO",
+		},
 	}
 }
 
 func (c *MakeFirstPlanet) Init(events *twodee.GameEventHandler) {
-	c.SendMessages([]string{
-		"HEY",
-		"HI",
-		"WHAT'S UP",
-	}, 2*time.Second, events)
+	c.SendMessages(c.introText, c.interval, events)
+}
+
+func (c *MakeFirstPlanet) Success(events *twodee.GameEventHandler) {
+	if !c.done {
+		c.ClearCallbacks()
+		c.SendMessages([]string{
+			"WONDERFUL!",
+		}, c.interval, events)
+		c.done = true
+	}
 }
 
 func (c *MakeFirstPlanet) IsAvailable(sim *Simulation) bool {
 	return true
 }
+
+func (c *MakeFirstPlanet) IsSatisfied(sim *Simulation) bool {
+	if len(sim.Planets) > 0 {
+		c.hasCreated = true
+	}
+
+	waitTime := c.interval * time.Duration(len(c.introText)-3)
+	return c.GetElapsed() > waitTime && c.hasCreated
+}
+
+//fmt.Sprintf("SEE IF YOU CAN KEEP ONE FOR LONGER THAN %v SECONDS", c.seconds),
