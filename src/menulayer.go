@@ -102,6 +102,44 @@ func (l *MenuLayer) HandleEvent(evt twodee.Event) bool {
 		return true
 	}
 	switch event := evt.(type) {
+	case *twodee.MouseButtonEvent:
+		if event.Type != twodee.Press {
+			break
+		}
+		if data := l.menu.Select(); data != nil {
+			l.handleMenuItem(data)
+		}
+		l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(MenuSel))
+		return false
+	case *twodee.MouseMoveEvent:
+		var (
+			y         = l.bounds.Max.Y
+			my        = y - event.Y
+			texture   *twodee.Texture
+			textCache *twodee.TextCache
+			ok        bool
+		)
+		for i, item := range l.menu.Items() {
+			if item.Highlighted() {
+				texture = l.highlightCache.Texture
+			} else if item.Active() {
+				texture = l.activeCache.Texture
+			} else {
+				if textCache, ok = l.cache[i]; ok {
+					texture = textCache.Texture
+				}
+			}
+			if texture != nil {
+				y = y - float32(texture.Height)
+				if my >= y {
+					if !item.Highlighted() {
+						l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(MenuClick))
+						l.menu.HighlightItem(item)
+					}
+					break
+				}
+			}
+		}
 	case *twodee.KeyEvent:
 		if event.Type != twodee.Press {
 			break
