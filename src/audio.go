@@ -9,6 +9,8 @@ type AudioSystem struct {
 	planetFireDeathEffect           *twodee.SoundEffect
 	planetCollisionEffect           *twodee.SoundEffect
 	backgroundMusicObserverId       int
+	pauseMusicObserverId            int
+	resumeMusicObserverId           int
 	planetDropEffectObserverId      int
 	planetFireDeathEffectObserverId int
 	planetCollisionEffectObserverId int
@@ -16,6 +18,18 @@ type AudioSystem struct {
 
 func (a *AudioSystem) PlayBackgroundMusic(e twodee.GETyper) {
 	a.backgroundMusic.Play(-1)
+}
+
+func (a *AudioSystem) PauseMusic(e twodee.GETyper) {
+	if twodee.MusicIsPlaying() {
+		twodee.PauseMusic()
+	}
+}
+
+func (a *AudioSystem) ResumeMusic(e twodee.GETyper) {
+	if twodee.MusicIsPaused() {
+		twodee.ResumeMusic()
+	}
 }
 
 func (a *AudioSystem) PlayPlanetDropEffect(e twodee.GETyper) {
@@ -38,9 +52,11 @@ func (a *AudioSystem) PlayPlanetCollisionEffect(e twodee.GETyper) {
 
 func (a *AudioSystem) Delete() {
 	a.app.GameEventHandler.RemoveObserver(PlayBackgroundMusic, a.backgroundMusicObserverId)
+	a.app.GameEventHandler.RemoveObserver(PauseMusic, a.pauseMusicObserverId)
+	a.app.GameEventHandler.RemoveObserver(ResumeMusic, a.resumeMusicObserverId)
 	a.app.GameEventHandler.RemoveObserver(DropPlanet, a.planetDropEffectObserverId)
-	a.app.GameEventHandler.RemoveObserver(DropPlanet, a.planetFireDeathEffectObserverId)
-	a.app.GameEventHandler.RemoveObserver(DropPlanet, a.planetCollisionEffectObserverId)
+	a.app.GameEventHandler.RemoveObserver(PlanetFireDeath, a.planetFireDeathEffectObserverId)
+	a.app.GameEventHandler.RemoveObserver(PlanetCollision, a.planetCollisionEffectObserverId)
 	a.backgroundMusic.Delete()
 	a.planetDropEffect.Delete()
 	a.planetFireDeathEffect.Delete()
@@ -73,12 +89,15 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 		planetFireDeathEffect: planetFireDeathEffect,
 		planetCollisionEffect: planetCollisionEffect,
 	}
-	planetDropEffect.SetVolume(60)
+	planetDropEffect.SetVolume(100)
 	planetFireDeathEffect.SetVolume(60)
 	planetCollisionEffect.SetVolume(60)
 	audioSystem.backgroundMusicObserverId = app.GameEventHandler.AddObserver(PlayBackgroundMusic, audioSystem.PlayBackgroundMusic)
 	audioSystem.planetDropEffectObserverId = app.GameEventHandler.AddObserver(DropPlanet, audioSystem.PlayPlanetDropEffect)
 	audioSystem.planetFireDeathEffectObserverId = app.GameEventHandler.AddObserver(PlanetFireDeath, audioSystem.PlayPlanetFireDeathEffect)
 	audioSystem.planetCollisionEffectObserverId = app.GameEventHandler.AddObserver(PlanetCollision, audioSystem.PlayPlanetCollisionEffect)
+	audioSystem.pauseMusicObserverId = app.GameEventHandler.AddObserver(PauseMusic, audioSystem.PauseMusic)
+	audioSystem.resumeMusicObserverId = app.GameEventHandler.AddObserver(ResumeMusic, audioSystem.ResumeMusic)
+	return
 	return
 }
