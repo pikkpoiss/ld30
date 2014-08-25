@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"time"
 
@@ -87,33 +86,28 @@ func (l *OverlayLayer) Render() {
 		return
 	}
 	var (
-		y       = l.bounds.Max.Y - l.offsetY
-		x       = l.offset.X
-		texture *twodee.Texture
+		y         = l.bounds.Max.Y - l.offset.Y
+		x         = l.offset.X
+		texture   *twodee.Texture
+		textCache *twodee.TextCache
+		ok        bool
 	)
 	l.tileRenderer.Bind()
 	l.tileRenderer.Draw(l.frame, 0.5, 0.5, 0, false, false)
 	l.tileRenderer.Unbind()
 
 	l.text.Bind()
-	for i, item := range l.game.Cheevos.GetSatisfied() {
-		if textCache, ok = l.cache[i]; !ok {
+	for i, item := range l.game.Cheevos.Passed {
+		if textCache, ok = l.cheevosCache[i]; !ok {
 			textCache = twodee.NewTextCache(l.regFont)
-			l.cache[i] = textCache
+			l.cheevosCache[i] = textCache
 		}
-		textCache.SetText(item.Label())
+		textCache.SetText(item)
 		texture = textCache.Texture
 		if texture != nil {
 			y = y - float32(texture.Height)
 			l.text.Draw(texture, x, y)
 		}
-		// FINISH
-	}
-	text := fmt.Sprintf("hihi\nhow\nare\nyou")
-	l.cheevosText.SetText(text)
-	if l.cheevosText.Texture != nil {
-		y = maxY - float32(l.cheevosText.Texture.Height)
-		l.text.Draw(l.cheevosText.Texture, 5, y)
 	}
 	l.text.Unbind()
 }
