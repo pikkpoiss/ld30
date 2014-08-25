@@ -32,15 +32,15 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 		messageFont *twodee.FontFace
 		background  = color.Transparent
 		exoFont     = "assets/fonts/Exo-SemiBold.ttf"
-		abelFont     = "assets/fonts/Abel-Regular.ttf"
+		abelFont    = "assets/fonts/Abel-Regular.ttf"
 	)
-	if regularFont, err = twodee.NewFontFace(exoFont, 24, color.RGBA{255, 255, 255, 255}, background); err != nil {
+	if regularFont, err = twodee.NewFontFace(exoFont, 24, regColor, background); err != nil {
 		return
 	}
-	if planetFont, err = twodee.NewFontFace(exoFont, 18, color.RGBA{255, 255, 255, 255}, background); err != nil {
+	if planetFont, err = twodee.NewFontFace(exoFont, 18, regColor, background); err != nil {
 		return
 	}
-	if messageFont, err = twodee.NewFontFace(abelFont, 40, color.RGBA{206, 38, 178, 255}, background); err != nil {
+	if messageFont, err = twodee.NewFontFace(abelFont, 40, regColor, background); err != nil {
 		return
 	}
 	layer = &HudLayer{
