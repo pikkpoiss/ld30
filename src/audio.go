@@ -19,15 +19,21 @@ func (a *AudioSystem) PlayBackgroundMusic(e twodee.GETyper) {
 }
 
 func (a *AudioSystem) PlayPlanetDropEffect(e twodee.GETyper) {
-	a.planetDropEffect.PlayChannel(2, 1)
+	if a.planetDropEffect.IsPlaying(2) == 0 {
+		a.planetDropEffect.PlayChannel(2, 1)
+	}
 }
 
 func (a *AudioSystem) PlayPlanetFireDeathEffect(e twodee.GETyper) {
-	a.planetFireDeathEffect.PlayChannel(3, 1)
+	if a.planetFireDeathEffect.IsPlaying(3) == 0 {
+		a.planetFireDeathEffect.PlayChannel(3, 1)
+	}
 }
 
 func (a *AudioSystem) PlayPlanetCollisionEffect(e twodee.GETyper) {
-	a.planetCollisionEffect.PlayChannel(4, 1)
+	if a.planetCollisionEffect.IsPlaying(4) == 0 {
+		a.planetCollisionEffect.PlayChannel(4, 1)
+	}
 }
 
 func (a *AudioSystem) Delete() {
