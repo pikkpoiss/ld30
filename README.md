@@ -17,12 +17,12 @@ You are trying to populate a solar system with life.  You can place Earth-like p
   * [x] Multiple planets
   * [x] Placeholder art
   * [x] Music loading
-  * [ ] Heads up display of temp, population for planets
+  * [x] Heads up display of temp, population for planets
   * [ ] Different types of planets?
   * [ ] Planet collisions
   * [ ] Production art
-  * [ ] Production music
-  * [ ] Production sound effects
+  * [x] Production music
+  * [x] Production sound effects
   * [ ] Splash screen
   * [ ] End game mechanic
   * [ ] Final score screen
