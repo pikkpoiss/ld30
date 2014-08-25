@@ -56,7 +56,7 @@ func NewApplication() (app *Application, err error) {
 	if hudLayer, err = NewHudLayer(app, gameLayer); err != nil {
 		return
 	}
-	if menuLayer, err = NewMenuLayer(app); err != nil {
+	if menuLayer, err = NewMenuLayer(app, twodee.Pt(256, 190)); err != nil {
 		return
 	}
 	if app.AudioSystem, err = NewAudioSystem(app); err != nil {
