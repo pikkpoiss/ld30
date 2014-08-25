@@ -21,12 +21,12 @@ You are trying to populate a solar system with life.  You can place Earth-like p
   * [x] Menu system
   * [ ] Different types of planets?
   * [x] Planet collisions
-  * [ ] Production art
+  * [x] Production art
   * [x] Production music
   * [x] Production sound effects
   * [ ] Splash screen
-  * [ ] End game mechanic
-  * [ ] Final score screen
+  * [x] End game mechanic
+  * [x] Final score screen
   * [ ] Planet quota / pool of available?
 
 ## Setup
