@@ -13,6 +13,7 @@ const (
 	ReleasePlanet
 	ShowSplash
 	PauseMusic
+	ResumeMusic
 	PlayGameOverEffect
 	DisplayMessage
 	MenuOpen

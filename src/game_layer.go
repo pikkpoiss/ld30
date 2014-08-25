@@ -1,9 +1,10 @@
 package main
 
 import (
-	twodee "../libs/twodee"
 	"math"
 	"time"
+
+	twodee "../libs/twodee"
 )
 
 const (
@@ -25,9 +26,12 @@ type GameLayer struct {
 	MouseY                float32
 	DropPlanetListener    int
 	ReleasePlanetListener int
+	openMenuListener      int
+	closeMenuListener     int
 	DurLeft               time.Duration
 	phantomPlanet         *PlanetaryBody
 	count                 int64
+	paused                bool
 }
 
 func NewGameLayer(app *Application) (layer *GameLayer, err error) {
@@ -39,6 +43,7 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 		DurLeft:       startDur,
 		phantomPlanet: nil,
 		count:         0,
+		paused:        false,
 	}
 	if layer.BatchRenderer, err = twodee.NewBatchRenderer(layer.Bounds, app.WinBounds); err != nil {
 		return
@@ -62,6 +67,8 @@ func NewGameLayer(app *Application) (layer *GameLayer, err error) {
 	layer.Cheevos = NewCheevos(layer.App.GameEventHandler, layer.Sim)
 	layer.DropPlanetListener = layer.App.GameEventHandler.AddObserver(DropPlanet, layer.OnDropPlanet)
 	layer.ReleasePlanetListener = layer.App.GameEventHandler.AddObserver(ReleasePlanet, layer.OnReleasePlanet)
+	layer.openMenuListener = layer.App.GameEventHandler.AddObserver(MenuOpen, layer.OnMenuToggle)
+	layer.closeMenuListener = layer.App.GameEventHandler.AddObserver(MenuClose, layer.OnMenuToggle)
 	return
 }
 
@@ -83,6 +90,8 @@ func (l *GameLayer) Delete() {
 	}
 	l.App.GameEventHandler.RemoveObserver(DropPlanet, l.DropPlanetListener)
 	l.App.GameEventHandler.RemoveObserver(ReleasePlanet, l.ReleasePlanetListener)
+	l.App.GameEventHandler.RemoveObserver(MenuOpen, l.openMenuListener)
+	l.App.GameEventHandler.RemoveObserver(MenuClose, l.closeMenuListener)
 }
 
 func (l *GameLayer) Render() {
@@ -151,6 +160,9 @@ func (l *GameLayer) Render() {
 }
 
 func (l *GameLayer) Update(elapsed time.Duration) {
+	if l.paused {
+		return
+	}
 	l.Sim.Update(elapsed)
 	l.Cheevos.Update(elapsed)
 	l.DurLeft -= elapsed
@@ -216,6 +228,10 @@ func (l *GameLayer) OnReleasePlanet(evt twodee.GETyper) {
 			l.phantomPlanet = nil
 		}
 	}
+}
+
+func (l *GameLayer) OnMenuToggle(evt twodee.GETyper) {
+	l.paused = !l.paused
 }
 
 func (l *GameLayer) WorldToScreenCoords(pt twodee.Point) twodee.Point {

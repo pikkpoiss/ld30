@@ -31,10 +31,11 @@ type MenuLayer struct {
 	hiCache  *twodee.TextCache
 	actCache *twodee.TextCache
 	bounds   twodee.Rectangle
+	offset   twodee.Point
 	app      *Application
 }
 
-func NewMenuLayer(app *Application) (layer *MenuLayer, err error) {
+func NewMenuLayer(app *Application, offset twodee.Point) (layer *MenuLayer, err error) {
 	var (
 		menu    *twodee.Menu
 		text    *twodee.TextRenderer
@@ -74,6 +75,7 @@ func NewMenuLayer(app *Application) (layer *MenuLayer, err error) {
 		hiCache:  twodee.NewTextCache(hiFont),
 		actCache: twodee.NewTextCache(actFont),
 		bounds:   app.WinBounds,
+		offset:   offset,
 		app:      app,
 	}
 	return
@@ -102,6 +104,46 @@ func (l *MenuLayer) HandleEvent(evt twodee.Event) bool {
 		return true
 	}
 	switch event := evt.(type) {
+	case *twodee.MouseButtonEvent:
+		if event.Type != twodee.Press {
+			break
+		}
+		if data := l.menu.Select(); data != nil {
+			l.handleMenuItem(data)
+		}
+		l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(MenuSel))
+		return false
+	case *twodee.MouseMoveEvent:
+		var (
+			y         = l.offset.Y
+			by        = l.offset.Y
+			cy        = event.Y
+			texture   *twodee.Texture
+			textCache *twodee.TextCache
+			ok        bool
+		)
+		for i, item := range l.menu.Items() {
+			if item.Highlighted() {
+				texture = l.hiCache.Texture
+			} else if item.Active() {
+				texture = l.actCache.Texture
+			} else {
+				if textCache, ok = l.cache[i]; ok {
+					texture = textCache.Texture
+				}
+			}
+			if texture != nil {
+				by = y + float32(texture.Height)
+				if cy >= y && cy <= by {
+					if !item.Highlighted() {
+						l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(MenuClick))
+						l.menu.HighlightItem(item)
+					}
+					break
+				}
+				y = by
+			}
+		}
 	case *twodee.KeyEvent:
 		if event.Type != twodee.Press {
 			break
@@ -136,6 +178,12 @@ func (l *MenuLayer) handleMenuItem(data *twodee.MenuItemData) {
 		switch data.Value {
 		case musicCode:
 			// TODO: Write code that mutes/un-mutes music.
+			if twodee.MusicIsPaused() {
+				l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(ResumeMusic))
+			} else {
+				l.app.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PauseMusic))
+
+			}
 		case exitCode:
 			l.app.InitiateCloseGame = true
 		}
@@ -176,7 +224,8 @@ func (l *MenuLayer) Render() {
 		textCache *twodee.TextCache
 		texture   *twodee.Texture
 		ok        bool
-		y         = l.bounds.Max.Y
+		y         = l.bounds.Max.Y - l.offset.Y
+		x         = l.offset.X
 	)
 	l.text.Bind()
 	for i, item := range l.menu.Items() {
@@ -196,7 +245,7 @@ func (l *MenuLayer) Render() {
 		}
 		if texture != nil {
 			y = y - float32(texture.Height)
-			l.text.Draw(texture, 0, y)
+			l.text.Draw(texture, x, y)
 
 		}
 	}
