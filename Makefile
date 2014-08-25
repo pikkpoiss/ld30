@@ -1,6 +1,6 @@
 .phony: build clean run
 
-PROJECT = ld30
+PROJECT = sol
 SOURCES = $(wildcard src/*.go)
 RUNTIME_ASSETS = $(wildcard src/assets/*)
 ICON_ASSETS = $(wildcard assets/*.icns)
@@ -36,7 +36,7 @@ $(OSXBUILD)/MacOS/%.dylib: libs/osx/%.dylib
 $(OSXBUILD)/MacOS/$(PROJECT): $(SOURCES)
 	mkdir -p $(dir $@)
 	go build -o $@ src/*.go
-#	cd $(OSXBUILD)/MacOS/ && ../../../../../scripts/fix.sh
+	cd $(OSXBUILD)/MacOS/ && ../../../../../scripts/fix.sh
 
 $(OSXBUILD)/Resources/%.icns: assets/%.icns
 	mkdir -p $(dir $@)
