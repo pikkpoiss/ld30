@@ -2,39 +2,58 @@ package main
 
 import (
 	twodee "../libs/twodee"
+	"fmt"
 	"time"
 )
 
 type Cheevos struct {
-	events *twodee.GameEventHandler
-	queue  []Cheevo
-	sim    *Simulation
-	active Cheevo
+	events  *twodee.GameEventHandler
+	queue   []Cheevo
+	sim     *Simulation
+	active  Cheevo
+	wait    time.Duration
+	counter time.Duration
 }
 
 func NewCheevos(events *twodee.GameEventHandler, sim *Simulation) *Cheevos {
 	return &Cheevos{
 		events: events,
 		queue: []Cheevo{
-			NewMakeFirstPlanet(),
+			NewTotalPopulation(1000),
+			//NewMakeFirstPlanet(),
+			//NewPlanetVelocity(0.03),
+			//NewKeepPlanetAlive(10),
+			NewMultiPlanets(3, 3),
+			NewKeepPlanetAlive(20),
 		},
-		sim:    sim,
-		active: nil,
+		sim:     sim,
+		active:  nil,
+		wait:    5 * time.Second,
+		counter: 5 * time.Second,
 	}
 }
 
 func (c *Cheevos) Update(elapsed time.Duration) {
 	if c.active != nil {
 		c.active.Update(elapsed)
-		if c.active.IsSatisfied(c.sim) {
+		if c.active.IsSuccess(c.sim) && !c.active.IsDone() {
 			c.active.Success(c.events)
+			c.active.SetDone()
+		} else if c.active.IsFailure(c.sim) && !c.active.IsDone() {
+			c.active.Failure(c.events)
+			c.active.SetDone()
 		}
 		if c.active.IsReadyToDelete() {
 			c.active.Delete()
 			c.active = nil
+			c.counter = 0
 		}
 	} else {
-		c.selectActive()
+		if c.counter < c.wait {
+			c.counter += elapsed
+		} else {
+			c.selectActive()
+		}
 	}
 }
 
@@ -58,8 +77,12 @@ func (c *Cheevos) Delete() {
 type Cheevo interface {
 	Init(events *twodee.GameEventHandler)
 	Success(events *twodee.GameEventHandler)
+	Failure(events *twodee.GameEventHandler)
+	IsDone() bool
+	SetDone()
 	IsAvailable(sim *Simulation) bool
-	IsSatisfied(sim *Simulation) bool
+	IsSuccess(sim *Simulation) bool
+	IsFailure(sim *Simulation) bool
 	IsReadyToDelete() bool
 	GetLabel() string
 	GetElapsed() time.Duration
@@ -68,16 +91,22 @@ type Cheevo interface {
 }
 
 type BaseCheevo struct {
+	done      bool
 	label     string
 	callbacks []*Callback
 	elapsed   time.Duration
+	interval  time.Duration
+	expires   time.Duration
 }
 
-func newBaseCheevo(label string) *BaseCheevo {
+func newBaseCheevo(label string, expires time.Duration) *BaseCheevo {
 	return &BaseCheevo{
 		label:     label,
 		callbacks: []*Callback{},
 		elapsed:   0,
+		done:      false,
+		interval:  2 * time.Second,
+		expires:   expires,
 	}
 }
 
@@ -87,6 +116,18 @@ func (c *BaseCheevo) GetLabel() string {
 
 func (c *BaseCheevo) GetElapsed() time.Duration {
 	return c.elapsed
+}
+
+func (c *BaseCheevo) GetInterval() time.Duration {
+	return c.interval
+}
+
+func (c *BaseCheevo) SetDone() {
+	c.done = true
+}
+
+func (c *BaseCheevo) IsDone() bool {
+	return c.done
 }
 
 func (c *BaseCheevo) HasPendingCallbacks() bool {
@@ -111,11 +152,11 @@ func (c *BaseCheevo) sendMessage(msg string, events *twodee.GameEventHandler) fu
 	}
 }
 
-func (c *BaseCheevo) SendMessages(messages []string, interval time.Duration, events *twodee.GameEventHandler) {
+func (c *BaseCheevo) SendMessages(messages []string, events *twodee.GameEventHandler) {
 	var counter time.Duration = 0
 	for i := 0; i < len(messages); i++ {
 		c.After(counter, c.sendMessage(messages[i], events))
-		counter += interval
+		counter += c.interval
 	}
 	c.After(counter, c.sendMessage("", events))
 }
@@ -131,32 +172,38 @@ func (c *BaseCheevo) Update(elapsed time.Duration) {
 }
 
 func (c *BaseCheevo) IsReadyToDelete() bool {
-	return !c.HasPendingCallbacks()
+	return c.done && !c.HasPendingCallbacks()
 }
+
+func (c *BaseCheevo) IsFailure(sim *Simulation) bool {
+	return c.elapsed > c.expires
+}
+
+func (c *BaseCheevo) Failure(events *twodee.GameEventHandler) {
+	c.ClearCallbacks()
+	c.SendMessages([]string{"DARN, THAT TOOK TOO LONG"}, events)
+}
+
+// MAKE THE FIRST PLANET =======================================================
 
 type MakeFirstPlanet struct {
 	*BaseCheevo
-	seconds    int
 	hasCreated bool
-	interval   time.Duration
-	done       bool
 	introText  []string
 }
 
 func NewMakeFirstPlanet() Cheevo {
 	return &MakeFirstPlanet{
-		BaseCheevo: newBaseCheevo("Make first planet"),
+		BaseCheevo: newBaseCheevo(
+			"MADE YOUR FIRST PLANET",
+			30*time.Second),
 		hasCreated: false,
-		interval:   3 * time.Second,
-		done:       false,
 		introText: []string{
-			"",
 			"HELLO",
 			"WELCOME TO MY SYSTEM",
 			"",
 			"I SEE THAT YOU ARE ABLE TO MAKE PLANETS",
 			"COULD YOU MAKE ONE FOR ME?",
-			"",
 			"CLICK, DRAG THE MOUSE, AND LET GO",
 			"CLICK, DRAG THE MOUSE, AND LET GO",
 		},
@@ -164,30 +211,240 @@ func NewMakeFirstPlanet() Cheevo {
 }
 
 func (c *MakeFirstPlanet) Init(events *twodee.GameEventHandler) {
-	c.SendMessages(c.introText, c.interval, events)
+	c.SendMessages(c.introText, events)
 }
 
 func (c *MakeFirstPlanet) Success(events *twodee.GameEventHandler) {
-	if !c.done {
-		c.ClearCallbacks()
-		c.SendMessages([]string{
-			"WONDERFUL!",
-		}, c.interval, events)
-		c.done = true
-	}
+	c.ClearCallbacks()
+	c.SendMessages([]string{
+		"WONDERFUL!",
+	}, events)
 }
 
 func (c *MakeFirstPlanet) IsAvailable(sim *Simulation) bool {
 	return true
 }
 
-func (c *MakeFirstPlanet) IsSatisfied(sim *Simulation) bool {
+func (c *MakeFirstPlanet) IsSuccess(sim *Simulation) bool {
 	if len(sim.Planets) > 0 {
 		c.hasCreated = true
 	}
-
-	waitTime := c.interval * time.Duration(len(c.introText)-3)
+	waitTime := c.GetInterval() * time.Duration(len(c.introText)-1)
 	return c.GetElapsed() > waitTime && c.hasCreated
 }
 
-//fmt.Sprintf("SEE IF YOU CAN KEEP ONE FOR LONGER THAN %v SECONDS", c.seconds),
+// KEEP A PLANET ALIVE FOR MORE THAN 10 SECONDS ================================
+
+type KeepPlanetAlive struct {
+	*BaseCheevo
+	introText  []string
+	threshold  time.Duration
+	hasPassed  bool
+	planetName string
+}
+
+func NewKeepPlanetAlive(seconds int) Cheevo {
+	return &KeepPlanetAlive{
+		BaseCheevo: newBaseCheevo(
+			fmt.Sprintf("KEPT A PLANET ALIVE FOR %v SECONDS", seconds),
+			time.Duration(seconds+30)*time.Second),
+		hasPassed: false,
+		introText: []string{
+			"HOW GOOD ARE YOU AT KEEPING ORBITS STABLE?",
+			fmt.Sprintf("CAN YOU KEEP A PLANET ALIVE FOR %v SECONDS?", seconds),
+		},
+		threshold: time.Duration(seconds) * time.Second,
+	}
+}
+
+func (c *KeepPlanetAlive) Init(events *twodee.GameEventHandler) {
+	c.SendMessages(c.introText, events)
+}
+
+func (c *KeepPlanetAlive) Success(events *twodee.GameEventHandler) {
+	c.ClearCallbacks()
+	c.SendMessages([]string{
+		fmt.Sprintf("GREAT! %v HAS LIVED A LONG TIME", c.planetName),
+	}, events)
+}
+
+func (c *KeepPlanetAlive) IsAvailable(sim *Simulation) bool {
+	for _, p := range sim.Planets {
+		if p.Age > c.threshold {
+			return false
+		}
+	}
+	return true
+}
+
+func (c *KeepPlanetAlive) IsSuccess(sim *Simulation) bool {
+	if c.hasPassed == false {
+		for _, p := range sim.Planets {
+			if p.Age > c.threshold {
+				c.hasPassed = true
+				c.planetName = p.Name
+				break
+			}
+		}
+	}
+	waitTime := c.GetInterval() * time.Duration(len(c.introText))
+	return c.GetElapsed() > waitTime && c.hasPassed
+}
+
+// MAKE A PLANET'S VELOCITY X ==================================================
+
+type PlanetVelocity struct {
+	*BaseCheevo
+	introText  []string
+	velocity   float32
+	hasPassed  bool
+	planetName string
+}
+
+func NewPlanetVelocity(velocity float32) Cheevo {
+	return &PlanetVelocity{
+		BaseCheevo: newBaseCheevo(
+			"MADE A PLANET GO FAST",
+			15*time.Second),
+		hasPassed: false,
+		introText: []string{
+			"CAN YOU MAKE A PLANET GO FAST?",
+			"CLICK, DRAG THE MOUSE A DISTANCE, AND LET GO",
+		},
+		velocity: velocity,
+	}
+}
+
+func (c *PlanetVelocity) Init(events *twodee.GameEventHandler) {
+	c.SendMessages(c.introText, events)
+}
+
+func (c *PlanetVelocity) Success(events *twodee.GameEventHandler) {
+	c.ClearCallbacks()
+	c.SendMessages([]string{
+		fmt.Sprintf("WOAH! %v IS A SPEEDY ONE", c.planetName),
+	}, events)
+}
+
+func (c *PlanetVelocity) IsAvailable(sim *Simulation) bool {
+	return true
+}
+
+func (c *PlanetVelocity) IsSuccess(sim *Simulation) bool {
+	if c.hasPassed == false {
+		pt := twodee.Pt(0, 0)
+		for _, p := range sim.Planets {
+			if p.Velocity.DistanceTo(pt) >= c.velocity {
+				c.hasPassed = true
+				c.planetName = p.Name
+				break
+			}
+		}
+	}
+	waitTime := c.GetInterval() * time.Duration(len(c.introText)-1)
+	return c.GetElapsed() > waitTime && c.hasPassed
+}
+
+// N PLANETS FOR Y SECONDS =====================================================
+
+type MultiPlanets struct {
+	*BaseCheevo
+	introText   []string
+	planetCount int32
+	threshold   time.Duration
+	hasPassed   bool
+}
+
+func NewMultiPlanets(count int32, seconds int32) Cheevo {
+	return &MultiPlanets{
+		BaseCheevo: newBaseCheevo(
+			fmt.Sprintf("HAD %v PLANETS LIVE FOR %v SECONDS EACH", count, seconds),
+			40*time.Second),
+		hasPassed: false,
+		introText: []string{
+			fmt.Sprintf("I WANT TO SEE %v PLANETS AT ONCE", count),
+			fmt.Sprintf("HAVE THEM SURVIVE FOR %v SECONDS EACH", seconds),
+		},
+		planetCount: count,
+		threshold:   time.Duration(seconds) * time.Second,
+	}
+}
+
+func (c *MultiPlanets) Init(events *twodee.GameEventHandler) {
+	c.SendMessages(c.introText, events)
+}
+
+func (c *MultiPlanets) Success(events *twodee.GameEventHandler) {
+	c.ClearCallbacks()
+	c.SendMessages([]string{
+		"SO MANY PLANETS!",
+	}, events)
+}
+
+func (c *MultiPlanets) IsAvailable(sim *Simulation) bool {
+	return len(sim.Planets) < int(c.planetCount)
+}
+
+func (c *MultiPlanets) IsSuccess(sim *Simulation) bool {
+	if c.hasPassed == false {
+		var count int32 = 0
+		for _, p := range sim.Planets {
+			if p.Age > c.threshold {
+				count += 1
+			}
+		}
+		if count >= c.planetCount {
+			c.hasPassed = true
+		}
+	}
+	waitTime := c.GetInterval() * time.Duration(len(c.introText))
+	return c.GetElapsed() > waitTime && c.hasPassed
+}
+
+// TOTAL POPULATION ============================================================
+
+type TotalPopulation struct {
+	*BaseCheevo
+	introText  []string
+	population int32
+	hasPassed  bool
+}
+
+func NewTotalPopulation(population int32) Cheevo {
+	return &TotalPopulation{
+		BaseCheevo: newBaseCheevo(
+			fmt.Sprintf("ACHIEVED %v POPULATION", population),
+			300*time.Second),
+		hasPassed: false,
+		introText: []string{
+			"I YEARN FOR MORE LIFE",
+			fmt.Sprintf("PRODUCE %v TOTAL SOULS", population),
+		},
+		population: population,
+	}
+}
+
+func (c *TotalPopulation) Init(events *twodee.GameEventHandler) {
+	c.SendMessages(c.introText, events)
+}
+
+func (c *TotalPopulation) Success(events *twodee.GameEventHandler) {
+	c.ClearCallbacks()
+	c.SendMessages([]string{
+		fmt.Sprintf("I FEEL THE WARMTH OF %v TINY BODIES", c.population),
+	}, events)
+}
+
+func (c *TotalPopulation) IsAvailable(sim *Simulation) bool {
+	return sim.GetPopulation() < int(c.population)
+}
+
+func (c *TotalPopulation) IsSuccess(sim *Simulation) bool {
+	if c.hasPassed == false {
+		if sim.GetPopulation() >= int(c.population) {
+			c.hasPassed = true
+		}
+	}
+	waitTime := c.GetInterval() * time.Duration(len(c.introText))
+	return c.GetElapsed() > waitTime && c.hasPassed
+}

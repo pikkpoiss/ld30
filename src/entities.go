@@ -48,7 +48,7 @@ type PlanetaryBody struct {
 	Radius               float32
 	Scale                float32
 	DistToSun            float64
-	Created              time.Time
+	Age              time.Duration
 	Rotation             float32
 	Name                 string
 }
@@ -200,7 +200,7 @@ func NewSun() *PlanetaryBody {
 		Temperature:          27000000,
 		Radius:               length / 2.0,
 		Scale:                scale,
-		Created:              time.Now(),
+		Age:              0,
 		Rotation:             0,
 		Name:                 "Sol",
 	}
@@ -230,7 +230,7 @@ func NewPlanet(x, y float32) *PlanetaryBody {
 		Radius:               length / 2.0,
 		Scale:                scale,
 		DistToSun:            0.0,
-		Created:              time.Now(),
+		Age:              0,
 		Rotation:             rand.Float32(),
 		Name:                 SelectPlanetName(),
 	}
@@ -317,6 +317,7 @@ func (p *PlanetaryBody) Update(elapsed time.Duration) {
 	p.AnimatingEntity.Update(elapsed)
 	p.UpdatePopulation(elapsed)
 	p.UpdateTemperature(elapsed)
+	p.Age += elapsed
 	pos := p.Pos()
 	ms := float32(elapsed.Seconds() * 1e3)
 	dist := p.Velocity.Scale(ms)
