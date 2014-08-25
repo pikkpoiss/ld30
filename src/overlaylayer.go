@@ -143,11 +143,13 @@ func (l *OverlayLayer) HandleEvent(evt twodee.Event) bool {
 }
 
 func (l *OverlayLayer) NewGame() bool {
-	if err := l.Reset(); err != nil {
-		// TODO: Ugh, see if we can reset GameLayer?
-		return false
-	}
+	// Can't handle new games yet...
 	return false
+	//	if err := l.Reset(); err != nil {
+	//		// TODO: Ugh, see if we can reset GameLayer?
+	//		return false
+	//	}
+	//	return false
 }
 
 func (l *OverlayLayer) Update(elapsed time.Duration) {
