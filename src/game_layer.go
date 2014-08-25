@@ -172,9 +172,6 @@ func (l *GameLayer) Update(elapsed time.Duration) {
 	if l.DurLeft <= 0 {
 		l.DurLeft = time.Duration(0)
 		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(GameOver))
-		//		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(ShowSplash))
-		//		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PauseMusic))
-		//		l.App.GameEventHandler.Enqueue(twodee.NewBasicGameEvent(PlayGameOverEffect))
 	}
 }
 

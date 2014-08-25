@@ -14,6 +14,7 @@ type AudioSystem struct {
 	planetDropEffectObserverId      int
 	planetFireDeathEffectObserverId int
 	planetCollisionEffectObserverId int
+	gameOverObserverId              int
 }
 
 func (a *AudioSystem) PlayBackgroundMusic(e twodee.GETyper) {
@@ -50,6 +51,13 @@ func (a *AudioSystem) PlayPlanetCollisionEffect(e twodee.GETyper) {
 	}
 }
 
+func (a *AudioSystem) OnGameOver(e twodee.GETyper) {
+	if twodee.MusicIsPlaying() {
+		twodee.PauseMusic()
+	}
+	// TODO(kalev): Play a game over effect.
+}
+
 func (a *AudioSystem) Delete() {
 	a.app.GameEventHandler.RemoveObserver(PlayBackgroundMusic, a.backgroundMusicObserverId)
 	a.app.GameEventHandler.RemoveObserver(PauseMusic, a.pauseMusicObserverId)
@@ -57,6 +65,7 @@ func (a *AudioSystem) Delete() {
 	a.app.GameEventHandler.RemoveObserver(ReleasePlanet, a.planetDropEffectObserverId)
 	a.app.GameEventHandler.RemoveObserver(PlanetFireDeath, a.planetFireDeathEffectObserverId)
 	a.app.GameEventHandler.RemoveObserver(PlanetCollision, a.planetCollisionEffectObserverId)
+	a.app.GameEventHandler.RemoveObserver(GameOver, a.gameOverObserverId)
 	a.backgroundMusic.Delete()
 	a.planetDropEffect.Delete()
 	a.planetFireDeathEffect.Delete()
@@ -98,6 +107,6 @@ func NewAudioSystem(app *Application) (audioSystem *AudioSystem, err error) {
 	audioSystem.planetCollisionEffectObserverId = app.GameEventHandler.AddObserver(PlanetCollision, audioSystem.PlayPlanetCollisionEffect)
 	audioSystem.pauseMusicObserverId = app.GameEventHandler.AddObserver(PauseMusic, audioSystem.PauseMusic)
 	audioSystem.resumeMusicObserverId = app.GameEventHandler.AddObserver(ResumeMusic, audioSystem.ResumeMusic)
-	return
+	audioSystem.gameOverObserverId = app.GameEventHandler.AddObserver(GameOver, audioSystem.OnGameOver)
 	return
 }
