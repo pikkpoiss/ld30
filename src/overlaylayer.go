@@ -24,7 +24,7 @@ func NewOverlayLayer(app *Application, game *GameLayer) (layer *OverlayLayer, er
 		visible: false,
 	}
 	tilem := twodee.TileMetadata{
-		Path:       "/../assets/sun.psd",
+		Path:       "assets/sun.png",
 		PxPerUnit:  320,
 		TileWidth:  320,
 		TileHeight: 320,
