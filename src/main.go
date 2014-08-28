@@ -41,9 +41,13 @@ func NewApplication() (app *Application, err error) {
 	}
 	context.SetFullscreen(false)
 	context.SetCursor(true)
+	context.SetResizable(true)
 	if err = context.CreateWindow(int(winbounds.Max.X), int(winbounds.Max.Y), "LD30"); err != nil {
 		return
 	}
+	var width, height = context.Window.GetSize()
+	winbounds.Max.X = float32(width)
+	winbounds.Max.Y = float32(height)
 	layers = twodee.NewLayers()
 	app = &Application{
 		layers:            layers,

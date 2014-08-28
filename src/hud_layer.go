@@ -53,7 +53,7 @@ func NewHudLayer(app *Application, game *GameLayer) (layer *HudLayer, err error)
 		timeText:    twodee.NewTextCache(regularFont),
 		messageText: twodee.NewTextCache(messageFont),
 		App:         app,
-		bounds:      twodee.Rect(0, 0, 1024, 768),
+		bounds:      app.WinBounds,
 		game:        game,
 	}
 	err = layer.Reset()
