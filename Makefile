@@ -15,6 +15,10 @@ WINBUILD = build/$(PROJECT)-win
 WINLIBS  = $(wildcard libs/win/*.dll)
 WINLIBSD = $(subst libs/win/,$(WINBUILD)/,$(WINLIBS))
 
+NIXBUILD = build/$(PROJECT)-linux
+NIXLIBS  = $(wildcard libs/linux/*.*)
+NIXLIBSD = $(subst libs/linux/,$(NIXBUILD)/libs/,$(NIXLIBS))
+
 VERSION = $(shell cat VERSION)
 REPLACE = s/9\.9\.9/$(VERSION)/g
 
@@ -69,8 +73,31 @@ $(WINBUILD)/assets/%: src/assets/%
 build/$(PROJECT)-win-$(VERSION).zip: \
 	$(WINBUILD)/$(PROJECT).exe \
 	$(WINLIBSD) \
-	$(subst src/assets/,$(WINBUILD)/Resources/assets/,$(RUNTIME_ASSETS)) \
+	$(subst src/assets/,$(WINBUILD)/Resources/assets/,$(RUNTIME_ASSETS))
 	cd build && /c/Program\ Files/7-Zip/7z.exe a -r $(notdir $@) $(PROJECT)-win
+
+$(NIXBUILD)/launch.sh: scripts/launch.sh
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(NIXBUILD)/$(PROJECT): $(SOURCES)
+	mkdir -p $(dir $@)
+	go build -o $@ src/*.go
+
+$(NIXBUILD)/libs/%: libs/linux/%
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(NIXBUILD)/assets/%: src/assets/%
+	mkdir -p $(dir $@)
+	cp -R $< $@
+
+build/$(PROJECT)-linux-$(VERSION).zip: \
+	$(NIXBUILD)/launch.sh \
+	$(NIXBUILD)/$(PROJECT) \
+	$(NIXLIBSD) \
+	$(subst src/assets/,$(NIXBUILD)/assets/,$(RUNTIME_ASSETS))
+	cd build && zip -r $(notdir $@) $(PROJECT)-linux
 
 build: build/$(PROJECT)-osx-$(VERSION).zip
 
