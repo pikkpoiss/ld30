@@ -73,7 +73,7 @@ $(WINBUILD)/assets/%: src/assets/%
 build/$(PROJECT)-win-$(VERSION).zip: \
 	$(WINBUILD)/$(PROJECT).exe \
 	$(WINLIBSD) \
-	$(subst src/assets/,$(WINBUILD)/Resources/assets/,$(RUNTIME_ASSETS))
+	$(subst src/assets/,$(WINBUILD)/assets/,$(RUNTIME_ASSETS))
 	cd build && /c/Program\ Files/7-Zip/7z.exe a -r $(notdir $@) $(PROJECT)-win
 
 $(NIXBUILD)/launch.sh: scripts/launch.sh
