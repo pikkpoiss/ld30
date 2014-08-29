@@ -23,12 +23,12 @@ install_name_tool -change /usr/local/lib/libSDL_image-1.2.0.dylib @executable_pa
 
 # libvorbisfile.dylib
 install_name_tool -change /usr/local/lib/libvorbisfile.3.dylib @executable_path/libvorbisfile.3.dylib libvorbisfile.dylib
-install_name_tool -change /usr/local/Cellar/libvorbis/1.3.3/lib/libvorbis.0.dylib @executable_path/libvorbis.0.dylib libvorbisfile.dylib
+install_name_tool -change /usr/local/Cellar/libvorbis/1.3.4/lib/libvorbis.0.dylib @executable_path/libvorbis.0.dylib libvorbisfile.dylib
 install_name_tool -change /usr/local/lib/libogg.0.dylib @executable_path/libogg.0.dylib libvorbisfile.dylib
 
 # libvorbisfile.3.dylib
 install_name_tool -change /usr/local/lib/libvorbisfile.3.dylib @executable_path/libvorbisfile.3.dylib libvorbisfile.3.dylib
-install_name_tool -change /usr/local/Cellar/libvorbis/1.3.3/lib/libvorbis.0.dylib @executable_path/libvorbis.0.dylib libvorbisfile.3.dylib
+install_name_tool -change /usr/local/Cellar/libvorbis/1.3.4/lib/libvorbis.0.dylib @executable_path/libvorbis.0.dylib libvorbisfile.3.dylib
 install_name_tool -change /usr/local/lib/libogg.0.dylib @executable_path/libogg.0.dylib libvorbisfile.3.dylib
 
 # libvorbis.dylib
