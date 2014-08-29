@@ -11,6 +11,10 @@ OSXBUILD = $(BASEBUILD)/$(PROJECT).app/Contents
 OSXLIBS  = $(wildcard libs/osx/*.dylib)
 OSXLIBSD = $(subst libs/osx/,$(OSXBUILD)/MacOS/,$(OSXLIBS))
 
+YOSBUILD = $(BASEBUILD)-yosemite/$(PROJECT).app/Contents
+YOSLIBS  = $(wildcard libs/osx-yosemite/*.dylib)
+YOSLIBSD = $(subst libs/osx-yosemite/,$(YOSBUILD)/MacOS/,$(YOSLIBS))
+
 WINBUILD = build/$(PROJECT)-win
 WINLIBS  = $(wildcard libs/win/*.dll)
 WINLIBSD = $(subst libs/win/,$(WINBUILD)/,$(WINLIBS))
@@ -45,6 +49,7 @@ $(OSXBUILD)/MacOS/$(PROJECT): $(SOURCES)
 $(OSXBUILD)/Resources/%.icns: assets/%.icns
 	mkdir -p $(dir $@)
 	cp $< $@
+
 $(OSXBUILD)/Resources/assets/%: src/assets/%
 	mkdir -p $(dir $@)
 	cp -R $< $@
@@ -57,6 +62,40 @@ build/$(PROJECT)-osx-$(VERSION).zip: \
 	$(subst src/assets/,$(OSXBUILD)/Resources/assets/,$(RUNTIME_ASSETS)) \
 	$(subst assets/,$(OSXBUILD)/Resources/,$(ICON_ASSETS))
 	cd build && zip -r $(notdir $@) $(PROJECT)-osx
+
+$(YOSBUILD)/MacOS/launch.sh: scripts/launch.sh
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(YOSBUILD)/Info.plist: pkg/osx/Info.plist
+	mkdir -p $(YOSBUILD)
+	sed $(REPLACE) $< > $@
+
+$(YOSBUILD)/MacOS/%.dylib: libs/osx-yosemite/%.dylib
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(YOSBUILD)/MacOS/$(PROJECT): $(SOURCES)
+	mkdir -p $(dir $@)
+	go build -o $@ src/*.go
+	cd $(YOSBUILD)/MacOS/ && ../../../../../scripts/fix-yosemite.sh
+
+$(YOSBUILD)/Resources/%.icns: assets/%.icns
+	mkdir -p $(dir $@)
+	cp $< $@
+
+$(YOSBUILD)/Resources/assets/%: src/assets/%
+	mkdir -p $(dir $@)
+	cp -R $< $@
+
+build/$(PROJECT)-osx-yosemite-$(VERSION).zip: \
+	$(YOSBUILD)/MacOS/launch.sh \
+	$(YOSBUILD)/Info.plist \
+	$(YOSLIBSD) \
+	$(YOSBUILD)/MacOS/$(PROJECT) \
+	$(subst src/assets/,$(YOSBUILD)/Resources/assets/,$(RUNTIME_ASSETS)) \
+	$(subst assets/,$(YOSBUILD)/Resources/,$(ICON_ASSETS))
+	cd build && zip -r $(notdir $@) $(PROJECT)-osx-yosemite
 
 $(WINBUILD)/$(PROJECT).exe: $(SOURCES)
 	mkdir -p $(dir $@)
